@@ -3,124 +3,316 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Trendex Pro — Multi-User Simulator</title>
+<title>Trendex Pro — Simulator</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#0B0F14; --panel:#121821; --panel-alt:#1A2330; --border:#233040;
-  --text:#E8EDF2; --muted:#7C8B9C; --up:#21C87A; --down:#F1495B; --amber:#F5A623; --info:#4C9AFF;
-  --font-display:'Space Grotesk', sans-serif; --font-body:'Inter', sans-serif; --font-mono:'JetBrains Mono', monospace;
+  --bg:#0B0F14;
+  --panel:#121821;
+  --panel-alt:#1A2330;
+  --border:#233040;
+  --text:#E8EDF2;
+  --muted:#7C8B9C;
+  --up:#21C87A;
+  --up-dim:#134A34;
+  --down:#F1495B;
+  --down-dim:#4A1B23;
+  --amber:#F5A623;
+  --info:#4C9AFF;
+  --font-display:'Space Grotesk', sans-serif;
+  --font-body:'Inter', sans-serif;
+  --font-mono:'JetBrains Mono', monospace;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-html,body{background:var(--bg);color:var(--text);font-family:var(--font-body);height:100%;overflow-x:hidden;}
+html,body{background:var(--bg);color:var(--text);font-family:var(--font-body);height:100%;overflow-x:hidden;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility;line-height:1.5;}
 button{font-family:inherit;cursor:pointer;border:none;}
 input{font-family:inherit;}
+::selection{background:var(--info);color:#fff;}
+
 .app{min-height:100vh;display:flex;flex-direction:column;}
 
-/* ---------- Auth screen ---------- */
-.auth-screen{
-  position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:20px;
-  background:radial-gradient(circle at 20% 15%, rgba(33,200,122,0.16), transparent 45%),
-             radial-gradient(circle at 85% 80%, rgba(76,154,255,0.16), transparent 45%), var(--bg);
+/* ---------- Demo banner ---------- */
+.demo-banner{
+  background:linear-gradient(90deg, var(--amber), #FFC94D);
+  color:#1A1200;
+  font-family:var(--font-mono);
+  font-weight:700;
+  font-size:12px;
+  letter-spacing:0.06em;
+  text-align:center;
+  padding:6px 10px;
 }
-.auth-screen.hidden{display:none;}
-.auth-card{width:340px;max-width:100%;background:linear-gradient(180deg, var(--panel), var(--panel-alt));border:1px solid var(--border);border-radius:18px;padding:32px 26px 26px;box-shadow:0 20px 60px rgba(0,0,0,0.45);}
-.auth-brand{display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:22px;text-align:center;}
-.auth-brand-mark{width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg, var(--up), var(--info));display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(33,200,122,0.35);}
-.auth-brand-name{font-family:var(--font-display);font-weight:700;font-size:19px;}
-.auth-brand-name span{display:block;color:var(--amber);font-size:10px;font-weight:600;letter-spacing:0.14em;margin-top:2px;}
-.auth-tabs{display:flex;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:3px;margin-bottom:20px;}
-.auth-tab{flex:1;text-align:center;padding:9px 0;border-radius:8px;font-family:var(--font-display);font-weight:700;font-size:13px;color:var(--muted);background:transparent;transition:all .15s;}
-.auth-tab.active{background:var(--info);color:#04101F;}
-.auth-field{margin-bottom:14px;}
-.auth-field label{display:block;font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);font-weight:600;margin-bottom:6px;}
-.auth-input-wrap{display:flex;align-items:center;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:0 12px;}
-.auth-input-wrap:focus-within{border-color:var(--info);}
-.auth-input-wrap input{flex:1;background:transparent;border:none;color:var(--text);font-family:var(--font-mono);font-size:14px;padding:11px 0;width:0;}
-.auth-input-wrap input:focus{outline:none;}
-.auth-submit{width:100%;padding:13px 0;border-radius:10px;margin-top:6px;background:linear-gradient(135deg, var(--up), #1CA968);color:#04140C;font-family:var(--font-display);font-weight:700;font-size:14px;box-shadow:0 8px 20px rgba(33,200,122,0.25);}
-.auth-note{text-align:center;font-size:12px;font-family:var(--font-mono);margin-top:12px;min-height:14px;}
-.auth-footnote{text-align:center;font-size:11px;color:var(--muted);margin-top:16px;line-height:1.5;}
 
 /* ---------- Top bar ---------- */
-.demo-banner{background:linear-gradient(90deg, var(--amber), #FFC94D);color:#1A1200;font-family:var(--font-mono);font-weight:700;font-size:12px;letter-spacing:0.06em;text-align:center;padding:6px 10px;}
-.topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--panel);border-bottom:1px solid var(--border);}
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 16px;
+  background:var(--panel);
+  border-bottom:1px solid var(--border);
+  position:relative;z-index:20;
+}
 .brand{display:flex;align-items:center;gap:10px;}
-.brand-mark{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg, var(--up), var(--info));display:flex;align-items:center;justify-content:center;}
-.brand-name{font-family:var(--font-display);font-weight:700;font-size:17px;}
+.brand-mark{
+  width:30px;height:30px;border-radius:8px;overflow:hidden;
+  background:linear-gradient(135deg, var(--up), var(--info));
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-display);font-weight:700;font-size:15px;color:#04120A;
+}
+.brand-name{font-family:var(--font-display);font-weight:700;font-size:17px;letter-spacing:0.01em;}
 .brand-name span{color:var(--amber);font-size:10px;font-weight:600;display:block;letter-spacing:0.12em;margin-top:-2px;}
+
 .top-right{display:flex;align-items:center;gap:14px;}
-.balance-chip{font-family:var(--font-mono);background:var(--panel-alt);border:1px solid var(--border);border-radius:10px;padding:6px 12px;font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px;}
-.balance-chip .label{color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:0.08em;}
-.menu-btn{width:38px;height:38px;border-radius:10px;background:var(--panel-alt);border:1px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;}
+.balance-chip{
+  font-family:var(--font-mono);
+  background:var(--panel-alt);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:6px 12px;
+  font-size:14px;font-weight:600;
+  display:flex;align-items:center;gap:8px;
+}
+.balance-chip .label{color:var(--muted);font-size:10px;font-family:var(--font-body);text-transform:uppercase;letter-spacing:0.08em;}
+.menu-btn{
+  width:38px;height:38px;border-radius:10px;background:var(--panel-alt);
+  border:1px solid var(--border);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+}
 .menu-btn span{width:16px;height:2px;background:var(--text);border-radius:2px;}
 
 /* ---------- Layout ---------- */
 .layout{display:flex;flex:1;gap:1px;background:var(--border);}
 .chart-col{flex:1;min-width:0;background:var(--bg);display:flex;flex-direction:column;}
-.trade-col{width:280px;flex-shrink:0;background:var(--panel);display:flex;flex-direction:column;gap:14px;padding:16px;border-left:1px solid var(--border);}
-.chart-toolbar{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--border);background:var(--panel);overflow-x:auto;}
-.chip{font-family:var(--font-mono);font-size:11px;font-weight:600;color:var(--muted);background:var(--panel-alt);border:1px solid var(--border);border-radius:7px;padding:5px 10px;white-space:nowrap;}
+.trade-col{
+  width:280px;flex-shrink:0;background:var(--panel);
+  display:flex;flex-direction:column;gap:14px;padding:16px;
+  border-left:1px solid var(--border);
+}
+
+/* Chart toolbar */
+.chart-toolbar{
+  display:flex;align-items:center;gap:8px;padding:10px 14px;
+  border-bottom:1px solid var(--border);background:var(--panel);
+  overflow-x:auto;
+}
+.chip{
+  font-family:var(--font-mono);font-size:11px;font-weight:600;
+  color:var(--muted);background:var(--panel-alt);
+  border:1px solid var(--border);border-radius:7px;
+  padding:5px 10px;white-space:nowrap;transition:all .15s;
+}
 .chip.active{color:var(--bg);background:var(--info);border-color:var(--info);}
-.pair-label{font-family:var(--font-mono);font-weight:700;font-size:13px;margin-right:auto;}
+.pair-label{font-family:var(--font-mono);font-weight:700;font-size:13px;color:var(--text);margin-right:auto;}
 .pair-label .otc{color:var(--amber);font-size:10px;margin-left:6px;border:1px solid var(--amber);border-radius:5px;padding:1px 5px;}
+
 canvas{display:block;}
 .chart-wrap{position:relative;padding:8px 0;}
 .chart-scroll{overflow-x:auto;overflow-y:hidden;height:100%;-webkit-overflow-scrolling:touch;}
-.sub-chart-label{position:absolute;left:14px;top:6px;font-family:var(--font-mono);font-size:10px;color:var(--muted);letter-spacing:0.06em;z-index:2;}
-#candleWrap{height:260px;} #rsiWrap{height:80px;} #macdWrap{height:80px;}
-@media (min-width: 861px){ #candleWrap{height:420px;} }
-@media (max-width: 860px){ .layout{flex-direction:column;} .trade-col{width:100%;border-left:none;border-top:1px solid var(--border);} }
+.chart-scroll::-webkit-scrollbar{height:6px;}
+.chart-scroll::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
 
+.result-popup{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) scale(0.85);
+  z-index:15;background:rgba(11,15,20,0.95);
+  border:2px solid var(--up);border-radius:14px;
+  padding:16px 28px;text-align:center;
+  opacity:0;pointer-events:none;transition:opacity .2s, transform .2s;
+  box-shadow:0 0 24px rgba(33,200,122,0.35);
+}
+.result-popup.show{opacity:1;transform:translate(-50%,-50%) scale(1);}
+.result-popup.lose{border-color:var(--down);box-shadow:0 0 24px rgba(241,73,91,0.35);}
+.result-popup .rp-label{
+  font-family:var(--font-display);font-weight:700;font-size:13px;letter-spacing:0.08em;
+  color:var(--text);margin-bottom:6px;
+}
+.result-popup .rp-amount{
+  font-family:var(--font-mono);font-weight:700;font-size:26px;color:var(--up);
+}
+.result-popup.lose .rp-amount{color:var(--down);}
+.sub-chart-label{
+  position:absolute;left:14px;top:6px;font-family:var(--font-mono);font-size:10px;
+  color:var(--muted);letter-spacing:0.06em;z-index:2;
+}
+
+/* Trade panel */
 .panel-block{background:var(--panel-alt);border:1px solid var(--border);border-radius:12px;padding:12px;}
-.panel-title{font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:8px;font-weight:600;}
+.panel-title{font-size:11px;text-transform:uppercase;letter-spacing:0.09em;color:#9AABC0;margin-bottom:9px;font-weight:700;}
+
 .live-balance{font-family:var(--font-mono);font-size:22px;font-weight:700;color:var(--up);}
 .live-balance small{font-size:11px;color:var(--muted);font-family:var(--font-body);font-weight:500;display:block;margin-top:2px;}
+
 .time-select{display:flex;gap:8px;}
-.time-select button{flex:1;padding:8px 0;border-radius:8px;background:var(--panel);border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:13px;font-weight:600;}
+.time-select button{
+  flex:1;padding:8px 0;border-radius:8px;background:var(--panel);
+  border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:13px;font-weight:600;
+}
 .time-select button.active{background:var(--info);border-color:var(--info);color:#04101F;}
+
 .invest-box{display:flex;align-items:center;background:var(--panel);border:1px solid var(--border);border-radius:8px;overflow:hidden;}
 .invest-box span{padding:0 10px;color:var(--muted);font-family:var(--font-mono);font-size:13px;}
-.invest-box input{flex:1;background:transparent;border:none;color:var(--text);font-family:var(--font-mono);font-size:16px;font-weight:700;padding:10px 8px;width:0;}
+.invest-box input{
+  flex:1;background:transparent;border:none;color:var(--text);font-family:var(--font-mono);
+  font-size:16px;font-weight:700;padding:10px 8px;width:0;
+}
 .invest-box input:focus{outline:none;}
+.invest-box input::placeholder{color:#8695AB;font-weight:600;opacity:1;}
 .invest-quick{display:flex;gap:6px;margin-top:8px;}
 .invest-quick button{flex:1;background:var(--panel);border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:5px 0;font-size:11px;font-family:var(--font-mono);}
-.timer-clock{text-align:center;font-family:var(--font-mono);font-size:26px;font-weight:700;background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:10px 0;}
+
+.timer-clock{
+  text-align:center;font-family:var(--font-mono);font-size:26px;font-weight:700;color:var(--text);
+  background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:10px 0;
+  letter-spacing:0.04em;
+}
 .timer-clock.idle{color:var(--muted);font-size:14px;font-weight:600;letter-spacing:0.08em;}
-.trade-buttons{display:flex;gap:8px;}
-.btn-up,.btn-down{flex:1;padding:15px 0;border-radius:10px;font-family:var(--font-display);font-weight:700;font-size:15px;color:#04140C;display:flex;align-items:center;justify-content:center;gap:8px;}
-.btn-up{background:var(--up);} .btn-down{background:var(--down);color:#180507;}
+
+.trade-buttons{display:flex;flex-direction:row;gap:8px;}
+.trade-controls-row{display:flex;gap:8px;}
+.trade-controls-row .panel-block{flex:1;min-width:0;padding:10px;}
+.btn-up,.btn-down{
+  flex:1;padding:15px 0;border-radius:10px;font-family:var(--font-display);
+  font-weight:700;font-size:15px;color:#04140C;display:flex;align-items:center;justify-content:center;gap:8px;
+  transition:transform .1s;
+}
+.btn-up{background:var(--up);}
+.btn-down{background:var(--down);color:#180507;}
+.btn-up:active,.btn-down:active{transform:scale(0.97);}
 .btn-up:disabled,.btn-down:disabled{opacity:0.4;cursor:not-allowed;}
-.payout-note{text-align:center;font-size:10px;color:var(--muted);font-family:var(--font-mono);margin-top:6px;}
+.payout-note{text-align:center;font-size:11px;color:#8C9AAE;font-family:var(--font-mono);margin-top:-2px;line-height:1.5;}
+
 .result-strip{display:flex;flex-direction:column;gap:6px;max-height:120px;overflow-y:auto;}
-.result-row{display:flex;justify-content:space-between;align-items:center;font-family:var(--font-mono);font-size:12px;background:var(--panel);border:1px solid var(--border);border-radius:7px;padding:7px 9px;}
-.result-row.win{color:var(--up);} .result-row.lose{color:var(--down);}
+.result-row{
+  display:flex;justify-content:space-between;align-items:center;
+  font-family:var(--font-mono);font-size:12px;background:var(--panel);
+  border:1px solid var(--border);border-radius:7px;padding:7px 9px;
+}
+.result-row.win{color:var(--up);}
+.result-row.lose{color:var(--down);}
 .result-row .dir{color:var(--muted);}
 .empty-note{font-size:11px;color:var(--muted);text-align:center;padding:10px 0;font-family:var(--font-mono);}
 
-/* ---------- Side menu ---------- */
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);opacity:0;pointer-events:none;transition:opacity .2s;z-index:30;}
+/* ---------- Side Menu ---------- */
+.auth-screen{
+  position:fixed;inset:0;z-index:50;
+  display:flex;align-items:center;justify-content:center;padding:20px;
+  background:
+    radial-gradient(circle at 20% 15%, rgba(33,200,122,0.16), transparent 45%),
+    radial-gradient(circle at 85% 80%, rgba(76,154,255,0.16), transparent 45%),
+    var(--bg);
+}
+.auth-screen.hidden{display:none;}
+.auth-card{
+  width:340px;max-width:100%;position:relative;
+  background:linear-gradient(180deg, var(--panel), var(--panel-alt));
+  border:1px solid var(--border);border-top:3px solid var(--info);border-radius:18px;
+  padding:32px 26px 26px;
+  box-shadow:0 20px 60px rgba(0,0,0,0.45);
+}
+.auth-brand{display:flex;flex-direction:column;align-items:center;gap:6px;margin-bottom:24px;text-align:center;}
+.auth-brand-mark{
+  width:52px;height:52px;border-radius:14px;overflow:hidden;
+  background:linear-gradient(135deg, var(--up), var(--info));
+  display:flex;align-items:center;justify-content:center;margin-bottom:4px;
+  box-shadow:0 8px 24px rgba(33,200,122,0.35);
+}
+.auth-brand-name{font-family:var(--font-display);font-weight:700;font-size:22px;letter-spacing:0.03em;color:var(--text);}
+.auth-brand-name span{display:block;color:var(--info);font-size:11px;font-weight:700;letter-spacing:0.18em;margin-top:4px;}
+
+.auth-tabs{display:flex;background:var(--panel);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:20px;}
+.auth-tab{
+  flex:1;text-align:center;padding:12px 0;font-family:var(--font-display);
+  font-weight:700;font-size:13px;color:var(--info);background:transparent;transition:all .15s;
+}
+.auth-tab.active{background:var(--panel-alt);color:var(--text);}
+.auth-tab:first-child{border-right:1px solid var(--border);}
+
+.auth-field{margin-bottom:12px;}
+.auth-input-wrap{
+  display:flex;align-items:center;background:var(--panel);border:1px solid var(--border);
+  border-radius:10px;padding:0 12px;transition:border-color .15s;
+}
+.auth-input-wrap:focus-within{border-color:var(--info);}
+.auth-input-wrap .auth-ico{color:var(--muted);font-size:14px;margin-right:10px;flex-shrink:0;}
+.auth-input-wrap input{
+  flex:1;background:transparent;border:none;color:var(--text);font-family:var(--font-body);
+  font-size:14px;padding:13px 0;width:0;
+}
+.auth-input-wrap input::placeholder{color:#8C9AAE;}
+.auth-input-wrap input:focus{outline:none;}
+.auth-input-wrap.readonly{background:var(--panel-alt);}
+.auth-input-wrap.readonly input{color:var(--info);font-family:var(--font-mono);font-weight:700;}
+
+.auth-submit{
+  width:100%;padding:14px 0;border-radius:10px;margin-top:8px;
+  background:var(--info);
+  color:#04101F;font-family:var(--font-display);font-weight:700;font-size:14px;
+  box-shadow:0 8px 20px rgba(76,154,255,0.3);transition:transform .1s;
+}
+.auth-submit:active{transform:scale(0.98);}
+.auth-note{text-align:center;font-size:12px;font-family:var(--font-mono);margin-top:12px;min-height:14px;}
+.auth-footnote{text-align:center;font-size:11px;color:var(--muted);margin-top:16px;line-height:1.5;}
+
+.overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,0.55);opacity:0;pointer-events:none;
+  transition:opacity .2s;z-index:30;
+}
 .overlay.open{opacity:1;pointer-events:all;}
-.side-menu{position:fixed;top:0;right:0;height:100%;width:300px;max-width:85vw;background:var(--panel);border-left:1px solid var(--border);transform:translateX(100%);transition:transform .25s ease;z-index:31;display:flex;flex-direction:column;padding:18px;gap:6px;overflow-y:auto;}
+.admin-modal{
+  position:fixed;inset:0;display:none;align-items:center;justify-content:center;
+  z-index:40;pointer-events:none;
+}
+.admin-modal.open{display:flex;pointer-events:all;}
+.side-menu{
+  position:fixed;top:0;right:0;height:100%;width:300px;max-width:85vw;
+  background:var(--panel);border-left:1px solid var(--border);
+  transform:translateX(100%);transition:transform .25s ease;z-index:31;
+  display:flex;flex-direction:column;padding:18px;gap:6px;overflow-y:auto;
+}
 .side-menu.open{transform:translateX(0);}
-.side-menu h3{font-family:var(--font-display);font-size:16px;margin-bottom:10px;}
-.menu-item{display:flex;align-items:center;gap:12px;padding:12px 10px;border-radius:9px;color:var(--text);background:transparent;text-align:left;width:100%;font-size:14px;font-weight:600;}
+.side-menu h3{
+  font-family:var(--font-display);font-size:19px;font-weight:700;margin-bottom:12px;
+  background:linear-gradient(135deg, #E8EDF2, #9FD9C5);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+  letter-spacing:0.01em;
+}
+.menu-item{
+  display:flex;align-items:center;gap:12px;padding:12px 10px;border-radius:9px;
+  color:var(--text);background:transparent;text-align:left;width:100%;font-size:14px;font-weight:600;
+}
 .menu-item:hover{background:var(--panel-alt);}
 .menu-item .ico{width:20px;text-align:center;color:var(--info);}
 .menu-divider{height:1px;background:var(--border);margin:10px 0;}
 .menu-close{align-self:flex-end;color:var(--muted);background:none;font-size:22px;line-height:1;padding:4px;}
+
 .menu-view{display:none;flex-direction:column;gap:10px;}
 .menu-view.active{display:flex;}
 .back-btn{color:var(--info);background:none;font-family:var(--font-mono);font-size:12px;text-align:left;padding:6px 0 10px;}
-.history-list{display:flex;flex-direction:column;gap:8px;}
-.history-row{display:flex;justify-content:space-between;background:var(--panel-alt);border:1px solid var(--border);border-radius:8px;padding:10px;font-family:var(--font-mono);font-size:12px;}
-.history-row .meta{color:var(--muted);font-size:10px;margin-top:3px;font-family:var(--font-body);}
-.verify-submit{width:100%;margin-top:10px;padding:10px 0;border-radius:8px;background:var(--info);color:#04101F;font-weight:700;font-family:var(--font-display);}
 
-/* ---------- Admin modal ---------- */
-.admin-modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:40;}
-.admin-modal.open{display:flex;}
+.verify-card{background:var(--panel-alt);border:1px solid var(--border);border-radius:10px;padding:14px;}
+.verify-card input{
+  width:100%;background:var(--panel);border:1px solid var(--border);border-radius:8px;
+  color:var(--text);padding:10px;font-family:var(--font-mono);margin-top:8px;
+}
+.verify-card input:focus{outline:none;border-color:var(--info);}
+.verify-submit{
+  width:100%;margin-top:10px;padding:10px 0;border-radius:8px;background:var(--info);
+  color:#04101F;font-weight:700;font-family:var(--font-display);
+}
+.verified-badge{display:inline-flex;align-items:center;gap:6px;color:var(--up);font-family:var(--font-mono);font-size:12px;margin-top:8px;}
+
+.flash-success{ animation: flashGlowGreen 1.3s ease; }
+.flash-error{ animation: flashGlowRed 1.3s ease; }
+@keyframes flashGlowGreen{
+  0%{ box-shadow: 0 0 0 0 rgba(33,200,122,0); }
+  25%{ box-shadow: 0 0 22px 6px rgba(33,200,122,0.65); }
+  100%{ box-shadow: 0 0 0 0 rgba(33,200,122,0); }
+}
+@keyframes flashGlowRed{
+  0%{ box-shadow: 0 0 0 0 rgba(241,73,91,0); }
+  25%{ box-shadow: 0 0 22px 6px rgba(241,73,91,0.65); }
+  100%{ box-shadow: 0 0 0 0 rgba(241,73,91,0); }
+}
+
 .chat-bubble-row{display:flex;margin-bottom:8px;}
 .chat-bubble-row.mine{justify-content:flex-end;}
 .chat-bubble-row.theirs{justify-content:flex-start;}
@@ -130,6 +322,25 @@ canvas{display:block;}
 .chat-bubble.mine .chat-meta{color:rgba(4,16,31,0.6);}
 .chat-bubble.theirs{background:var(--panel);border:1px solid var(--border);color:var(--text);border-bottom-left-radius:3px;}
 .chat-bubble.theirs .chat-label{font-size:10px;color:var(--up);font-weight:700;margin-bottom:2px;display:block;}
+
+.history-list{display:flex;flex-direction:column;gap:8px;}
+.history-row{
+  display:flex;justify-content:space-between;background:var(--panel-alt);
+  border:1px solid var(--border);border-radius:8px;padding:10px;font-family:var(--font-mono);font-size:12px;
+}
+.history-row .meta{color:#8C9AAE;font-size:11px;margin-top:3px;font-family:var(--font-body);}
+
+/* ---------- Responsive ---------- */
+#candleWrap{height:260px;}
+#rsiWrap{height:80px;}
+#macdWrap{height:80px;}
+@media (max-width: 860px){
+  .layout{flex-direction:column;}
+  .trade-col{width:100%;border-left:none;border-top:1px solid var(--border);}
+}
+@media (min-width: 861px){
+  #candleWrap{height:420px;}
+}
 </style>
 </head>
 <body>
@@ -137,45 +348,49 @@ canvas{display:block;}
 <div class="auth-screen" id="authScreen">
   <div class="auth-card">
     <div class="auth-brand">
-      <div class="auth-brand-mark">
-        <svg viewBox="0 0 32 32" width="30" height="30" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect x="5" y="19" width="4.5" height="8" rx="1.2" fill="#04140C"/>
-          <rect x="13.75" y="11" width="4.5" height="16" rx="1.2" fill="#04140C"/>
-          <rect x="22.5" y="4" width="4.5" height="23" rx="1.2" fill="#04140C"/>
-          <path d="M6 15L14 8L22 12L27 3" stroke="#04140C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
+      <div class="auth-brand-mark" style="background:none;box-shadow:none;">
+        <img src="data:image/png;base64,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" alt="Trendex Pro logo" style="width:100%;height:100%;border-radius:14px;object-fit:cover;">
       </div>
-      <div class="auth-brand-name">Trendex Pro<span>PRACTICE TERMINAL</span></div>
+      <div class="auth-brand-name">Trendex Pro<span>SECURE TERMINAL V1.0</span></div>
     </div>
+
     <div class="auth-tabs">
       <button class="auth-tab active" id="authTabLogin">Log In</button>
       <button class="auth-tab" id="authTabSignup">Sign Up</button>
     </div>
-    <div class="auth-field">
-      <label>Username</label>
-      <div class="auth-input-wrap"><input type="text" id="authUsername" placeholder="Enter your username"></div>
+
+    <div class="auth-field" id="fullNameField" style="display:none;">
+      <div class="auth-input-wrap">
+        <span class="auth-ico">◐</span>
+        <input type="text" id="authFullName" placeholder="Your full name">
+      </div>
     </div>
     <div class="auth-field">
-      <label>Password</label>
-      <div class="auth-input-wrap"><input type="password" id="authPassword" placeholder="Enter your password"></div>
+      <div class="auth-input-wrap">
+        <span class="auth-ico">📱</span>
+        <input type="tel" id="authUsername" placeholder="Mobile number">
+      </div>
     </div>
+    <div class="auth-field">
+      <div class="auth-input-wrap">
+        <span class="auth-ico">🔑</span>
+        <input type="password" id="authPassword" placeholder="Password">
+      </div>
+    </div>
+
     <button class="auth-submit" id="authSubmitBtn">Log In</button>
     <div class="auth-note" id="authNote"></div>
-    <div class="auth-footnote">Paper trading account · virtual funds only<br>Your account lives on this server, not just your device</div>
+    <div class="auth-footnote">Paper trading account · virtual funds only<br>Your progress is saved to this device</div>
   </div>
 </div>
 
 <div class="app">
-  <div class="demo-banner">⚠ TRENDEX PRO — PAPER TRADING</div>
+  <div class="demo-banner">⚠ TRENDEX PRO</div>
+
   <div class="topbar">
     <div class="brand">
-      <div class="brand-mark">
-        <svg viewBox="0 0 32 32" width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect x="5" y="19" width="4.5" height="8" rx="1.2" fill="#04140C"/>
-          <rect x="13.75" y="11" width="4.5" height="16" rx="1.2" fill="#04140C"/>
-          <rect x="22.5" y="4" width="4.5" height="23" rx="1.2" fill="#04140C"/>
-          <path d="M6 15L14 8L22 12L27 3" stroke="#04140C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
+      <div class="brand-mark" style="background:none;box-shadow:none;">
+        <img src="data:image/png;base64,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" alt="Trendex Pro logo" style="width:100%;height:100%;border-radius:8px;object-fit:cover;">
       </div>
       <div class="brand-name" id="brandName">Trendex Pro<span>PRACTICE TERMINAL</span></div>
     </div>
@@ -192,33 +407,71 @@ canvas{display:block;}
         <button class="chip active" id="toggleRSI">RSI</button>
         <button class="chip active" id="toggleMACD">MACD</button>
       </div>
-      <div class="chart-wrap" id="candleWrap"><div class="chart-scroll" id="chartScroll"><canvas id="candleChart"></canvas></div></div>
-      <div class="chart-wrap" id="rsiWrap"><span class="sub-chart-label">RSI (14)</span><canvas id="rsiChart"></canvas></div>
-      <div class="chart-wrap" id="macdWrap"><span class="sub-chart-label">MACD (12,26,9)</span><canvas id="macdChart"></canvas></div>
+      <div class="chart-wrap" id="candleWrap">
+        <div class="result-popup" id="resultPopup">
+          <div class="rp-label" id="rpLabel">RESULT (WIN)</div>
+          <div class="rp-amount" id="rpAmount">+$0.00</div>
+        </div>
+        <div class="chart-scroll" id="chartScroll">
+          <canvas id="candleChart"></canvas>
+        </div>
+      </div>
+      <div class="chart-wrap" id="rsiWrap">
+        <span class="sub-chart-label">RSI (14)</span>
+        <canvas id="rsiChart"></canvas>
+      </div>
+      <div class="chart-wrap" id="macdWrap">
+        <span class="sub-chart-label">MACD (12,26,9)</span>
+        <canvas id="macdChart"></canvas>
+      </div>
     </div>
 
     <div class="trade-col">
-      <div class="panel-block">
-        <div class="panel-title">Expiry Time</div>
-        <div class="time-select"><button class="active" data-sec="30">30s</button><button data-sec="60">1 min</button></div>
+      <div class="panel-block" style="display:none;">
+        <div class="panel-title">Live Balance</div>
+        <div class="live-balance" id="sideBalance">$0.00<small>Virtual funds · resets anytime in Menu</small></div>
       </div>
-      <div class="panel-block">
-        <div class="panel-title">Investment</div>
-        <div class="invest-box"><span>$</span><input type="number" id="investInput" value="50" min="1" step="1"></div>
-        <div class="invest-quick"><button data-amt="10">$10</button><button data-amt="50">$50</button><button data-amt="100">$100</button><button data-amt="500">$500</button></div>
-      </div>
+
       <div class="panel-block">
         <div class="panel-title">Timer</div>
         <div class="timer-clock idle" id="timerClock">No active trade</div>
       </div>
+
+      <div class="trade-controls-row">
+        <div class="panel-block">
+          <div class="panel-title">Expiry Time</div>
+          <div class="time-select">
+            <button class="active" data-sec="30">30s</button>
+            <button data-sec="60">1 min</button>
+          </div>
+        </div>
+
+        <div class="panel-block">
+          <div class="panel-title">Investment</div>
+          <div class="invest-box">
+            <span>$</span>
+            <input type="number" id="investInput" value="50" min="1" step="1">
+          </div>
+        </div>
+      </div>
+      <div class="invest-quick" style="margin-top:-6px;">
+        <button data-amt="10">$10</button>
+        <button data-amt="50">$50</button>
+        <button data-amt="100">$100</button>
+        <button data-amt="500">$500</button>
+      </div>
+
       <div class="trade-buttons">
         <button class="btn-up" id="upBtn">▲ UP</button>
         <button class="btn-down" id="downBtn">▼ DOWN</button>
       </div>
       <div class="payout-note">Payout on win: 87% of investment</div>
+
       <div class="panel-block" style="flex:1;">
         <div class="panel-title">Trade Result</div>
-        <div class="result-strip" id="resultStrip"><div class="empty-note">No trades yet</div></div>
+        <div class="result-strip" id="resultStrip">
+          <div class="empty-note">No trades yet — place one above</div>
+        </div>
       </div>
     </div>
   </div>
@@ -227,6 +480,7 @@ canvas{display:block;}
 <div class="overlay" id="overlay"></div>
 <div class="side-menu" id="sideMenu">
   <button class="menu-close" id="menuClose">×</button>
+
   <div class="menu-view active" id="view-main">
     <h3>Menu</h3>
     <button class="menu-item" data-view="main" id="navHome"><span class="ico">⌂</span> Home</button>
@@ -234,83 +488,13 @@ canvas{display:block;}
     <button class="menu-item" data-view="withdraw"><span class="ico">↑</span> Withdraw</button>
     <button class="menu-item" data-view="trades"><span class="ico">≡</span> Trade History</button>
     <button class="menu-item" data-view="balance"><span class="ico">$</span> Balance History</button>
-    <button class="menu-item" data-view="chat"><span class="ico">💬</span> Live Chat</button>
+    <button class="menu-item" data-view="profile"><span class="ico">◐</span> Profile Verification</button>
+    <button class="menu-item" data-view="contactadmin"><span class="ico">💬</span> Live Chat</button>
     <div class="menu-divider"></div>
     <button class="menu-item" id="logoutBtn"><span class="ico">⏻</span> Log Out</button>
   </div>
-  <div class="menu-view" id="view-deposit">
-    <button class="back-btn" data-back="main">← Back</button>
-    <h3>Deposit (Virtual)</h3>
-    <div class="panel-block">
-      <div class="panel-title">Wallet Balance</div>
-      <div class="live-balance" id="walletBalanceDisplay">$0.00<small>Deposits land here first</small></div>
-    </div>
-    <div class="panel-block">
-      <div class="panel-title">Submit Deposit Request</div>
-      <div class="invest-box"><span>$</span><input type="number" id="depositInput" value="500" min="1" step="1"></div>
-      <div class="panel-title" style="margin-top:10px;">Transaction ID (optional)</div>
-      <div class="invest-box"><input type="text" id="depositTxid" placeholder="Optional reference note" style="padding:10px 8px;font-size:14px;"></div>
-      <button class="verify-submit" id="depositSubmit">Submit Deposit Request</button>
-      <div class="payout-note" id="depositNote">Waits for admin approval before it's added to your Wallet.</div>
-    </div>
-    <div class="panel-block">
-      <div class="panel-title">Claim Approved Deposit</div>
-      <div class="invest-box"><input type="text" id="claimPasswordInput" placeholder="Enter approval password" style="padding:10px 8px;font-size:14px;"></div>
-      <button class="verify-submit" id="claimDepositSubmit">Unlock Deposit</button>
-      <div class="payout-note" id="claimNote"></div>
-    </div>
-    <div class="panel-title" style="margin-top:4px;">My Deposit Requests</div>
-    <div class="history-list" id="myDepositRequestsList"><div class="empty-note">No requests yet</div></div>
-    <div class="panel-block">
-      <div class="panel-title">Trade Balance (current)</div>
-      <div class="live-balance" id="tradeBalanceDisplay" style="color:var(--info);">$0.00<small>What you trade with on Home</small></div>
-    </div>
-    <div class="panel-block">
-      <div class="panel-title">Transfer to Trade Balance</div>
-      <div class="invest-box"><span>$</span><input type="number" id="transferInput" value="100" min="1" step="1"></div>
-      <button class="verify-submit" id="transferSubmit">Transfer</button>
-      <div class="payout-note" id="transferNote"></div>
-    </div>
-  </div>
-  <div class="menu-view" id="view-withdraw">
-    <button class="back-btn" data-back="main">← Back</button>
-    <h3>Withdraw (Virtual)</h3>
-    <div class="panel-block">
-      <div class="panel-title">Trade Balance (current)</div>
-      <div class="live-balance" id="tradeBalanceDisplay2" style="color:var(--info);">$0.00<small>Move winnings to Wallet before withdrawing</small></div>
-    </div>
-    <div class="panel-block">
-      <div class="panel-title">Move Trade Balance to Wallet</div>
-      <div class="invest-box"><span>$</span><input type="number" id="reverseTransferInput" value="100" min="1" step="1"></div>
-      <button class="verify-submit" id="reverseTransferSubmit">Move to Wallet</button>
-      <div class="payout-note" id="reverseTransferNote"></div>
-    </div>
-    <div class="panel-block">
-      <div class="panel-title">Wallet Balance</div>
-      <div class="live-balance" id="walletBalanceDisplay2">$0.00<small>Withdrawals are taken from here</small></div>
-    </div>
-    <div class="panel-block">
-      <div class="panel-title">Submit Withdraw Request</div>
-      <div class="invest-box"><span>$</span><input type="number" id="withdrawInput" value="100" min="1" step="1"></div>
-      <div class="panel-title" style="margin-top:10px;">Withdrawal Number</div>
-      <div class="invest-box"><input type="text" id="withdrawNumber" placeholder="Your bKash/Nagad number" style="padding:10px 8px;font-size:14px;"></div>
-      <button class="verify-submit" id="withdrawSubmit">Submit Withdraw Request</button>
-      <div class="payout-note" id="withdrawNote">Waits for admin approval.</div>
-    </div>
-    <div class="panel-title" style="margin-top:4px;">My Withdraw Requests</div>
-    <div class="history-list" id="myWithdrawRequestsList"><div class="empty-note">No requests yet</div></div>
-  </div>
-  <div class="menu-view" id="view-trades">
-    <button class="back-btn" data-back="main">← Back</button>
-    <h3>Trade History</h3>
-    <div class="history-list" id="tradeHistoryList"><div class="empty-note">No trades yet</div></div>
-  </div>
-  <div class="menu-view" id="view-balance">
-    <button class="back-btn" data-back="main">← Back</button>
-    <h3>Balance History</h3>
-    <div class="history-list" id="balanceHistoryList"><div class="empty-note">No changes yet</div></div>
-  </div>
-  <div class="menu-view" id="view-chat">
+
+  <div class="menu-view" id="view-contactadmin">
     <button class="back-btn" data-back="main">← Back</button>
     <h3>Live Chat with Admin</h3>
     <div class="panel-block">
@@ -318,592 +502,1541 @@ canvas{display:block;}
       <div class="history-list" id="myMessagesList" style="max-height:320px;overflow-y:auto;"><div class="empty-note">No messages yet — say hello!</div></div>
     </div>
     <div class="panel-block">
-      <div class="invest-box"><input type="text" id="chatMessageInput" placeholder="Type your message" style="padding:10px 8px;font-size:14px;"></div>
-      <button class="verify-submit" id="chatMessageSubmit">Send</button>
-      <div class="payout-note" id="chatMessageNote"></div>
+      <div class="invest-box"><input type="text" id="adminMessageInput" placeholder="Type your message" style="padding:10px 8px;font-size:14px;"></div>
+      <button class="verify-submit" id="adminMessageSubmit" style="margin-top:10px;">Send</button>
+      <div class="payout-note" id="adminMessageNote" style="margin-top:8px;">Sent directly to the Admin — no phone number needed</div>
+    </div>
+  </div>
+
+  <div class="menu-view" id="view-deposit">
+    <button class="back-btn" data-back="main">← Back</button>
+    <h3>Deposit (Virtual)</h3>
+    <div class="panel-block">
+      <div class="panel-title">Wallet Balance</div>
+      <div class="live-balance" id="walletBalanceDisplay" style="font-size:20px;">$0.00<small>Deposits land here first — transfer to Trade Balance to use them</small></div>
+    </div>
+    <div class="panel-block">
+      <div class="panel-title">Submit Deposit Request (Virtual)</div>
+      <div class="invest-box"><span>$</span><input type="number" id="depositInput" value="500" min="1" step="1"></div>
+      <div class="invest-quick">
+        <button data-dep="100">$100</button>
+        <button data-dep="500">$500</button>
+        <button data-dep="1000">$1,000</button>
+        <button data-dep="5000">$5,000</button>
+      </div>
+      <div class="panel-title" style="margin-top:10px;">Deposit Number</div>
+      <div class="invest-box"><input type="text" id="depositNumber" placeholder="The number you sent from" style="padding:10px 8px;font-size:14px;"></div>
+      <div class="panel-title" style="margin-top:10px;">Transaction ID (optional)</div>
+      <div class="invest-box"><input type="text" id="depositTxid" placeholder="Optional reference note" style="padding:10px 8px;font-size:14px;"></div>
+      <button class="verify-submit" id="depositSubmit" style="margin-top:10px;">Submit Deposit Request</button>
+      <div class="payout-note" id="depositNote" style="margin-top:8px;">Virtual funds only. Your request waits for approval before it's added to your Wallet.</div>
+    </div>
+    <div class="panel-block">
+      <div class="panel-title">Claim Approved Deposit</div>
+      <div class="invest-box"><input type="text" id="claimPasswordInput" placeholder="Enter approval password" style="padding:10px 8px;font-size:14px;"></div>
+      <button class="verify-submit" id="claimDepositSubmit" style="margin-top:10px;">Unlock Deposit</button>
+      <div class="payout-note" id="claimNote" style="margin-top:8px;">Once an admin approves your request, they'll give you a password to enter here — it adds the amount to your Wallet.</div>
+    </div>
+    <div class="panel-block">
+      <button class="menu-item" id="myDepositRequestsToggle" style="background:var(--panel);border:1px solid var(--border);border-radius:8px;">
+        <span class="ico">📥</span> My Deposit Requests (<span id="myDepositRequestCount">0</span>)
+      </button>
+      <div class="history-list" id="myDepositRequestsList" style="display:none;margin-top:10px;"><div class="empty-note">No requests yet</div></div>
+    </div>
+    <div class="panel-block">
+      <div class="panel-title">Trade Balance (current)</div>
+      <div class="live-balance" id="tradeBalanceDisplay" style="font-size:20px;color:var(--info);">$0.00<small>This is what you trade with on Home</small></div>
+    </div>
+    <div class="panel-block">
+      <div class="panel-title">Transfer to Trade Balance</div>
+      <div class="invest-box"><span>$</span><input type="number" id="transferInput" value="100" min="1" step="1"></div>
+      <button class="verify-submit" id="transferSubmit" style="margin-top:10px;">Transfer</button>
+      <div class="payout-note" id="transferNote" style="margin-top:8px;">Moves funds from Wallet into your Trade Balance</div>
+    </div>
+    <div class="panel-block">
+      <button class="menu-item" id="depositHistoryToggle" style="background:var(--panel);border:1px solid var(--border);border-radius:8px;">
+        <span class="ico">🧾</span> Deposit History
+      </button>
+      <div class="history-list" id="depositHistoryList" style="display:none;margin-top:10px;"><div class="empty-note">No deposits yet</div></div>
+    </div>
+  </div>
+
+  <div class="menu-view" id="view-withdraw">
+    <button class="back-btn" data-back="main">← Back</button>
+    <h3>Withdraw (Virtual)</h3>
+    <div class="panel-block">
+      <div class="panel-title">Trade Balance (current)</div>
+      <div class="live-balance" id="tradeBalanceDisplay2" style="font-size:20px;color:var(--info);">$0.00<small>Move winnings here into your Wallet before withdrawing</small></div>
+    </div>
+    <div class="panel-block">
+      <div class="panel-title">Move Trade Balance to Wallet</div>
+      <div class="invest-box"><span>$</span><input type="number" id="reverseTransferInput" value="100" min="1" step="1"></div>
+      <button class="verify-submit" id="reverseTransferSubmit" style="margin-top:10px;">Move to Wallet</button>
+      <div class="payout-note" id="reverseTransferNote" style="margin-top:8px;">Moves funds from Trade Balance into your Wallet, so you can withdraw them</div>
+    </div>
+    <div class="panel-block">
+      <div class="panel-title">Wallet Balance</div>
+      <div class="live-balance" id="walletBalanceDisplay2" style="font-size:20px;">$0.00<small>Withdrawals are taken from your Wallet Balance</small></div>
+    </div>
+    <div class="panel-block">
+      <div class="panel-title">Amount</div>
+      <div class="invest-box"><span>$</span><input type="number" id="withdrawInput" value="100" min="1" step="1"></div>
+      <div class="invest-quick">
+        <button data-wd="50">$50</button>
+        <button data-wd="100">$100</button>
+        <button data-wd="500">$500</button>
+        <button data-wd="1000">$1,000</button>
+      </div>
+      <div class="panel-title" style="margin-top:10px;">Withdrawal Number</div>
+      <div class="invest-box"><input type="text" id="withdrawNumber" placeholder="Your bKash/Nagad number" style="padding:10px 8px;font-size:14px;"></div>
+      <button class="verify-submit" id="withdrawSubmit" style="margin-top:10px;">Submit Withdraw Request</button>
+      <div class="payout-note" id="withdrawNote" style="margin-top:8px;">Virtual funds only. Your request waits for admin approval.</div>
+    </div>
+    <div class="panel-block">
+      <button class="menu-item" id="myWithdrawRequestsToggle" style="background:var(--panel);border:1px solid var(--border);border-radius:8px;">
+        <span class="ico">📤</span> My Withdraw Requests (<span id="myWithdrawRequestCount">0</span>)
+      </button>
+      <div class="history-list" id="myWithdrawRequestsList" style="display:none;margin-top:10px;"><div class="empty-note">No requests yet</div></div>
+    </div>
+    <div class="panel-block">
+      <button class="menu-item" id="withdrawHistoryToggle" style="background:var(--panel);border:1px solid var(--border);border-radius:8px;">
+        <span class="ico">🧾</span> Withdraw History
+      </button>
+      <div class="history-list" id="withdrawHistoryList" style="display:none;margin-top:10px;"><div class="empty-note">No withdrawals yet</div></div>
+    </div>
+  </div>
+
+  <div class="menu-view" id="view-trades">
+    <button class="back-btn" data-back="main">← Back</button>
+    <h3>Trade History</h3>
+    <div class="history-list" id="tradeHistoryList"><div class="empty-note">No trades yet</div></div>
+  </div>
+
+  <div class="menu-view" id="view-balance">
+    <button class="back-btn" data-back="main">← Back</button>
+    <h3>Balance History</h3>
+    <div class="history-list" id="balanceHistoryList"><div class="empty-note">No changes yet</div></div>
+  </div>
+
+  <div class="menu-view" id="view-profile">
+    <button class="back-btn" data-back="main">← Back</button>
+    <h3>Profile Verification</h3>
+    <div class="verify-card">
+      <div class="panel-title" style="margin-bottom:0;">Mobile Number</div>
+      <input type="tel" id="phoneInput" placeholder="e.g. 01700000000">
+      <button class="verify-submit" id="verifySubmit">Verify Profile</button>
+      <div id="verifiedNote"></div>
+    </div>
+  </div>
+
+  <div class="menu-view" id="view-admin">
+    <button class="back-btn" data-back="main">← Back</button>
+    <h3>Admin Panel</h3>
+    <div class="panel-block">
+      <button class="menu-item" id="adminUsersToggle" style="background:var(--panel);border:1px solid var(--border);border-radius:8px;">
+        <span class="ico">👥</span> Registered Users (<span id="adminUserCount">0</span>)
+      </button>
+      <div class="history-list" id="adminUsersList" style="display:none;margin-top:10px;"><div class="empty-note">No accounts yet</div></div>
+    </div>
+    <div class="panel-block">
+      <button class="menu-item" id="adminDepositRequestsToggle" style="background:var(--panel);border:1px solid var(--border);border-radius:8px;">
+        <span class="ico">📥</span> Deposit Requests (Pending: <span id="adminPendingCount">0</span>)
+      </button>
+      <div class="history-list" id="adminDepositRequestsList" style="display:none;margin-top:10px;"><div class="empty-note">No pending requests</div></div>
+    </div>
+    <div class="panel-block">
+      <button class="menu-item" id="adminWithdrawRequestsToggle" style="background:var(--panel);border:1px solid var(--border);border-radius:8px;">
+        <span class="ico">📤</span> Withdraw Requests (Pending: <span id="adminWithdrawPendingCount">0</span>)
+      </button>
+      <div class="history-list" id="adminWithdrawRequestsList" style="display:none;margin-top:10px;"><div class="empty-note">No pending requests</div></div>
+    </div>
+    <div class="panel-block">
+      <button class="menu-item" id="adminMessagesToggle" style="background:var(--panel);border:1px solid var(--border);border-radius:8px;">
+        <span class="ico">💬</span> Live Chat (<span id="adminMessageCount">0</span>)
+      </button>
+      <div class="history-list" id="adminMessagesList" style="display:none;margin-top:10px;"><div class="empty-note">No messages yet</div></div>
+    </div>
+    <div class="panel-block">
+      <div class="panel-title">Danger Zone</div>
+      <button class="verify-submit" id="adminResetBtn" style="background:var(--down);">Reset Trendex Pro Balance</button>
+      <div class="payout-note" style="margin-top:8px;">Wipes balance, wallet, and all history back to zero</div>
     </div>
   </div>
 </div>
 
 <div class="overlay" id="adminOverlay"></div>
 <div class="admin-modal" id="adminModal">
-  <div class="panel-block" style="width:320px;max-width:90vw;max-height:85vh;overflow-y:auto;">
-    <div class="panel-title">Admin — Password</div>
-    <div class="invest-box"><input type="password" id="adminPasswordInput" placeholder="Admin password" style="padding:10px 8px;"></div>
-    <button class="verify-submit" id="adminUnlockBtn">Unlock</button>
-    <div class="payout-note" id="adminLoginNote"></div>
-    <div id="adminUsersWrap" style="display:none;margin-top:14px;">
-      <div class="panel-title">All Users (<span id="adminUserCount">0</span>)</div>
-      <div class="history-list" id="adminUsersList" style="max-height:200px;overflow-y:auto;"></div>
-
-      <div class="panel-title" style="margin-top:14px;">Deposit Requests (Pending: <span id="adminDepositPendingCount">0</span>)</div>
-      <div class="history-list" id="adminDepositRequestsList" style="max-height:260px;overflow-y:auto;"></div>
-
-      <div class="panel-title" style="margin-top:14px;">Withdraw Requests (Pending: <span id="adminWithdrawPendingCount">0</span>)</div>
-      <div class="history-list" id="adminWithdrawRequestsList" style="max-height:260px;overflow-y:auto;"></div>
-
-      <div class="panel-title" style="margin-top:14px;">Live Chat (<span id="adminMessageCount">0</span>)</div>
-      <div class="history-list" id="adminMessagesList" style="max-height:300px;overflow-y:auto;"></div>
-    </div>
-    <button class="back-btn" id="adminCloseBtn" style="margin-top:10px;">Close</button>
+  <div class="panel-block" style="width:280px;">
+    <div class="panel-title">Admin Access</div>
+    <div class="invest-box"><input type="password" id="adminPasswordInput" placeholder="Enter admin password" style="padding:10px 8px;font-size:14px;"></div>
+    <button class="verify-submit" id="adminUnlockBtn" style="margin-top:10px;">Unlock</button>
+    <div class="payout-note" id="adminLoginNote" style="margin-top:8px;"></div>
   </div>
 </div>
 
 <script>
+// ============ STATE (persisted locally so refresh doesn't scramble it) ============
+const state = {
+  balance: 0,
+  walletBalance: 0,
+  timeframeSeconds: 30,
+  investAmount: 50,
+  candles: [],
+  price: 1.0842,
+  activeTrade: null,
+  tradeHistory: [],
+  balanceHistory: [],
+  depositHistory: [],
+  withdrawHistory: [],
+  phone: '',
+  verified: false,
+  showRSI: true,
+  showMACD: true,
+  candleStartTime: Date.now(),
+};
+
 const PAYOUT = 0.87;
-let token = localStorage.getItem('trendex-token') || null;
-let s = { balance:0, walletBalance:0, price:1.0842, candles:[], timeframeSeconds:30, activeTrade:null, tradeHistory:[], balanceHistory:[] };
-let investAmount = 50, showRSI = true, showMACD = true;
 
 function fmt(n){ return (n<0?'-':'') + '$' + Math.abs(n).toFixed(2); }
 function fmtPrice(n){ return n.toFixed(5); }
 
-async function api(path, opts={}){
-  opts.headers = Object.assign({'Content-Type':'application/json'}, opts.headers||{});
-  if(token) opts.headers['Authorization'] = 'Bearer ' + token;
-  const res = await fetch(path, opts);
-  if(!res.ok){ const e = await res.json().catch(()=>({error:'Request failed'})); throw new Error(e.error||'Request failed'); }
-  return res.json();
+// ============ DEPOSIT REQUESTS (shared across all accounts on this device) ============
+const DEPOSIT_REQUESTS_KEY = 'trendex-pro-deposit-requests';
+function getDepositRequests(){
+  try{ return JSON.parse(localStorage.getItem(DEPOSIT_REQUESTS_KEY) || '[]'); }
+  catch(e){ return []; }
+}
+function saveDepositRequests(list){
+  try{ localStorage.setItem(DEPOSIT_REQUESTS_KEY, JSON.stringify(list)); }catch(e){}
+}
+function generateApprovalPassword(){
+  return String(Math.floor(100000 + Math.random()*900000));
 }
 
-// ---------------- AUTH ----------------
-const authScreen = document.getElementById('authScreen');
-let authMode = 'login';
-function setAuthMode(mode){
-  authMode = mode;
-  document.getElementById('authTabLogin').classList.toggle('active', mode==='login');
-  document.getElementById('authTabSignup').classList.toggle('active', mode==='signup');
-  document.getElementById('authSubmitBtn').textContent = mode==='login' ? 'Log In' : 'Sign Up';
-  document.getElementById('authNote').textContent = '';
+// ============ WITHDRAW REQUESTS (shared across all accounts on this device) ============
+const WITHDRAW_REQUESTS_KEY = 'trendex-pro-withdraw-requests';
+function getWithdrawRequests(){
+  try{ return JSON.parse(localStorage.getItem(WITHDRAW_REQUESTS_KEY) || '[]'); }
+  catch(e){ return []; }
 }
-document.getElementById('authTabLogin').onclick = ()=> setAuthMode('login');
-document.getElementById('authTabSignup').onclick = ()=> setAuthMode('signup');
+function saveWithdrawRequests(list){
+  try{ localStorage.setItem(WITHDRAW_REQUESTS_KEY, JSON.stringify(list)); }catch(e){}
+}
 
-document.getElementById('authSubmitBtn').onclick = async ()=>{
-  const username = document.getElementById('authUsername').value.trim();
-  const password = document.getElementById('authPassword').value;
-  const note = document.getElementById('authNote');
-  note.textContent = '';
-  try{
-    const data = await api(authMode==='login' ? '/api/login' : '/api/signup', {
-      method:'POST', body: JSON.stringify({ username, password })
-    });
-    token = data.token;
-    localStorage.setItem('trendex-token', token);
-    authScreen.classList.add('hidden');
-    boot();
-  }catch(e){
-    note.textContent = e.message;
-    note.style.color = '#F1495B';
+// ============ CONTACT ADMIN MESSAGES (shared across all accounts on this device) ============
+const ADMIN_MESSAGES_KEY = 'trendex-pro-admin-messages';
+function getAdminMessages(){
+  try{ return JSON.parse(localStorage.getItem(ADMIN_MESSAGES_KEY) || '[]'); }
+  catch(e){ return []; }
+}
+function saveAdminMessages(list){
+  try{ localStorage.setItem(ADMIN_MESSAGES_KEY, JSON.stringify(list)); }catch(e){}
+}
+
+// Admin-side helper to read/write another account's saved state directly
+// (safe here because every account lives in the same browser's localStorage on this device)
+function loadRawUserState(username){
+  try{ return JSON.parse(localStorage.getItem('trendex-pro-state:' + username)); }
+  catch(e){ return null; }
+}
+function saveRawUserState(username, obj){
+  try{ localStorage.setItem('trendex-pro-state:' + username, JSON.stringify(obj)); }catch(e){}
+}
+
+// ============ CANDLE SIMULATION ============
+function seedCandles(){
+  let p = state.price;
+  const now = Date.now();
+  for(let i=60;i>0;i--){
+    const o = p;
+    const drift = (Math.random()-0.5)*0.0009;
+    const c = +(o + drift).toFixed(5);
+    const h = +Math.max(o,c, o + Math.random()*0.0004).toFixed(5);
+    const l = +Math.min(o,c, o - Math.random()*0.0004).toFixed(5);
+    state.candles.push({o,h,l,c,t: now - i*state.timeframeSeconds*1000});
+    p = c;
   }
-};
+  state.price = p;
+}
+seedCandles(); // ensure candles exist immediately, even before login completes
 
-document.getElementById('logoutBtn').onclick = async ()=>{
-  try{ await api('/api/logout', {method:'POST'}); }catch(e){}
-  localStorage.removeItem('trendex-token');
-  token = null;
-  closeMenu();
-  document.getElementById('authUsername').value = '';
-  document.getElementById('authPassword').value = '';
-  setAuthMode('login');
-  authScreen.classList.remove('hidden');
-};
+const USERS_KEY = 'trendex-pro-users';
+const SESSION_KEY = 'trendex-pro-session';
+let currentUser = null;
+function getStorageKey(){ return 'trendex-pro-state:' + currentUser; }
 
-// ---------------- POLLING ----------------
-let pollHandle = null;
-async function pollState(){
+function getUsers(){
+  try{ return JSON.parse(localStorage.getItem(USERS_KEY) || '{}'); }
+  catch(e){ return {}; }
+}
+function saveUsers(users){
+  try{ localStorage.setItem(USERS_KEY, JSON.stringify(users)); }catch(e){}
+}
+
+function renderAdminUsersList(){
+  const listEl = document.getElementById('adminUsersList');
+  const countEl = document.getElementById('adminUserCount');
+  if(!listEl) return;
+  const users = getUsers();
+  const names = Object.keys(users);
+  countEl.textContent = names.length;
+  if(names.length === 0){
+    listEl.innerHTML = '<div class="empty-note">No accounts yet</div>';
+    return;
+  }
+  listEl.innerHTML = names.map(name=>{
+    const rec = users[name];
+    const created = (rec && typeof rec === 'object' && rec.createdAt)
+      ? new Date(rec.createdAt).toLocaleString()
+      : 'Before tracking was added';
+    const isYou = name === currentUser ? ' (you)' : '';
+    return `
+      <div class="history-row">
+        <div><div>${name}${isYou}</div><div class="meta">Joined: ${created}</div></div>
+      </div>`;
+  }).join('');
+}
+
+function renderAdminDepositRequests(){
+  const listEl = document.getElementById('adminDepositRequestsList');
+  const countEl = document.getElementById('adminPendingCount');
+  if(!listEl) return;
+  const requests = getDepositRequests();
+  const pending = requests.filter(r => r.status === 'pending');
+  const approved = requests.filter(r => r.status === 'approved');
+  const rejected = requests.filter(r => r.status === 'rejected');
+  countEl.textContent = pending.length;
+
+  if(pending.length === 0 && approved.length === 0 && rejected.length === 0){
+    listEl.innerHTML = '<div class="empty-note">No pending requests</div>';
+    return;
+  }
+
+  const pendingHtml = pending.map(r => `
+    <div class="history-row">
+      <div>
+        <div>${r.username} — ${fmt(r.amount)}</div>
+        <div class="meta">${r.depositNumber ? 'Number: '+r.depositNumber+' · ' : ''}${r.txid ? 'TxID: '+r.txid+' · ' : ''}${new Date(r.requestedAt).toLocaleString()}</div>
+      </div>
+      <div style="display:flex;gap:6px;flex-shrink:0;">
+        <button class="verify-submit" style="width:auto;padding:8px 14px;margin:0;" data-approve-id="${r.id}">Approve</button>
+        <button class="verify-submit" style="width:auto;padding:8px 14px;margin:0;background:var(--down);" data-reject-id="${r.id}">Reject</button>
+      </div>
+    </div>`).join('');
+
+  const approvedHtml = approved.map(r => `
+    <div class="history-row">
+      <div>
+        <div>${r.username} — ${fmt(r.amount)} <span style="color:var(--up)">(waiting for user to claim)</span></div>
+        <div class="meta">Password: <span style="color:var(--info);font-family:var(--font-mono);">${r.unlockPassword}</span> — visible to the user too</div>
+      </div>
+    </div>`).join('');
+
+  const rejectedHtml = rejected.map(r => `
+    <div class="history-row" style="border-color:rgba(241,73,91,0.35);">
+      <div>
+        <div style="color:var(--down);">${r.username} — ${fmt(r.amount)} · Rejected</div>
+        <div class="meta" style="color:var(--down);">${r.txid ? 'TxID: '+r.txid+' · ' : ''}${new Date(r.rejectedAt || r.requestedAt).toLocaleString()}</div>
+      </div>
+    </div>`).join('');
+
+  listEl.innerHTML = pendingHtml + approvedHtml + rejectedHtml;
+
+  listEl.querySelectorAll('[data-approve-id]').forEach(btn=>{
+    btn.onclick = ()=>{
+      const id = btn.dataset.approveId;
+      const all = getDepositRequests();
+      const req = all.find(r => r.id === id);
+      if(!req) return;
+      req.status = 'approved';
+      req.unlockPassword = generateApprovalPassword();
+      req.approvedAt = new Date().toISOString();
+      saveDepositRequests(all);
+      renderAdminDepositRequests();
+    };
+  });
+
+  listEl.querySelectorAll('[data-reject-id]').forEach(btn=>{
+    btn.onclick = ()=>{
+      const id = btn.dataset.rejectId;
+      const all = getDepositRequests();
+      const req = all.find(r => r.id === id);
+      if(!req) return;
+      req.status = 'rejected';
+      req.rejectedAt = new Date().toISOString();
+      saveDepositRequests(all);
+      renderAdminDepositRequests();
+    };
+  });
+}
+
+function saveState(){
+  if(!currentUser) return;
   try{
-    const data = await api('/api/state');
-    s = data;
-    render();
+    const snapshot = {
+      balance: state.balance,
+      walletBalance: state.walletBalance,
+      price: state.price,
+      candles: state.candles,
+      tradeHistory: state.tradeHistory,
+      balanceHistory: state.balanceHistory,
+      depositHistory: state.depositHistory,
+      withdrawHistory: state.withdrawHistory,
+      phone: state.phone,
+      verified: state.verified,
+      timeframeSeconds: state.timeframeSeconds,
+      investAmount: state.investAmount,
+      candleStartTime: state.candleStartTime,
+      activeTrade: state.activeTrade,
+    };
+    localStorage.setItem(getStorageKey(), JSON.stringify(snapshot));
+  }catch(e){ /* storage unavailable in this browser — demo just runs in-memory for this session */ }
+}
+
+function loadStateAndInit(){
+  let restored = false;
+  try{
+    const raw = localStorage.getItem(getStorageKey());
+    if(raw){
+      const saved = JSON.parse(raw);
+      if(saved && Array.isArray(saved.candles) && saved.candles.length>0){
+        state.balance = saved.balance ?? state.balance;
+        state.walletBalance = saved.walletBalance ?? state.walletBalance;
+        state.price = saved.price ?? state.price;
+        state.candles = saved.candles;
+        state.tradeHistory = saved.tradeHistory || [];
+        state.balanceHistory = saved.balanceHistory || [];
+        state.depositHistory = saved.depositHistory || [];
+        state.withdrawHistory = saved.withdrawHistory || [];
+        state.phone = saved.phone || '';
+        state.verified = !!saved.verified;
+        state.timeframeSeconds = saved.timeframeSeconds || state.timeframeSeconds;
+        state.investAmount = saved.investAmount || state.investAmount;
+        state.candleStartTime = saved.candleStartTime || Date.now();
+        state.activeTrade = saved.activeTrade || null;
+        restored = true;
+      }
+    }
   }catch(e){
-    // token invalid/expired -> back to login
-    localStorage.removeItem('trendex-token');
-    token = null;
-    if(pollHandle) clearInterval(pollHandle);
-    authScreen.classList.remove('hidden');
+    // no saved state yet, or storage unavailable — fall back to a fresh demo
+  }
+  if(!restored){
+    state.candles = [];
+    seedCandles();
+  }
+
+  // sync UI to restored/initial state
+  document.getElementById('investInput').value = state.investAmount;
+  document.querySelectorAll('.time-select button').forEach(b=>{
+    b.classList.toggle('active', +b.dataset.sec === state.timeframeSeconds);
+  });
+  if(state.verified){
+    document.getElementById('phoneInput').value = state.phone;
+    document.getElementById('verifiedNote').innerHTML = `<div class="verified-badge">✓ Profile verified with ${state.phone}</div>`;
+  }
+  renderResultStrip();
+  renderTradeHistoryList();
+  renderBalanceHistoryList();
+  renderDepositHistoryList();
+  renderWithdrawHistoryList();
+  renderMyDepositRequests();
+  renderMyWithdrawRequests();
+  renderMyMessages();
+  updateBalanceUI();
+  updateButtons();
+  redrawAll();
+  const sc = document.getElementById('chartScroll');
+  sc.scrollLeft = sc.scrollWidth;
+}
+
+function tickPrice(){
+  const cur = state.candles[state.candles.length-1];
+  const move = (Math.random()-0.5)*0.00035;
+  state.price = +(state.price + move).toFixed(5);
+  cur.c = state.price;
+  cur.h = Math.max(cur.h, state.price);
+  cur.l = Math.min(cur.l, state.price);
+}
+
+function maybeShiftCandle(){
+  const elapsed = Date.now() - state.candleStartTime;
+  if(elapsed >= state.timeframeSeconds*1000){
+    const o = state.price;
+    state.candles.push({o,h:o,l:o,c:o,t:Date.now()});
+    if(state.candles.length > 120) state.candles.shift();
+    state.candleStartTime = Date.now();
   }
 }
-function boot(){
-  if(pollHandle) clearInterval(pollHandle);
-  pollState();
-  pollHandle = setInterval(pollState, 1000);
-}
-if(token){ authScreen.classList.add('hidden'); boot(); }
 
-// ---------------- CHART RENDERING ----------------
+// ============ INDICATORS ============
+function computeRSI(closes, period=14){
+  const rsi = [];
+  let gains=0, losses=0;
+  for(let i=1;i<closes.length;i++){
+    const diff = closes[i]-closes[i-1];
+    if(i<=period){
+      if(diff>=0) gains+=diff; else losses-=diff;
+      rsi.push(null);
+      if(i===period){
+        const rs = gains/(losses||1e-9);
+        rsi[rsi.length-1] = 100 - (100/(1+rs));
+      }
+      continue;
+    }
+    const gain = diff>0?diff:0, loss = diff<0?-diff:0;
+    gains = (gains*(period-1)+gain)/period;
+    losses = (losses*(period-1)+loss)/period;
+    const rs = gains/(losses||1e-9);
+    rsi.push(100 - (100/(1+rs)));
+  }
+  return [null, ...rsi];
+}
+
+function ema(values, period){
+  const k = 2/(period+1);
+  const out = [];
+  let prev;
+  values.forEach((v,i)=>{
+    if(v===null || v===undefined){ out.push(null); return; }
+    if(prev===undefined){ prev=v; out.push(v); return; }
+    prev = v*k + prev*(1-k);
+    out.push(prev);
+  });
+  return out;
+}
+
+function computeMACD(closes){
+  const ema12 = ema(closes,12);
+  const ema26 = ema(closes,26);
+  const macdLine = closes.map((_,i)=> (ema12[i]!=null && ema26[i]!=null) ? ema12[i]-ema26[i] : null);
+  const signalLine = ema(macdLine.map(v=>v==null?0:v), 9);
+  const hist = macdLine.map((v,i)=> v!=null ? v-signalLine[i] : null);
+  return {macdLine, signalLine, hist};
+}
+
+// ============ CANVAS DRAWING ============
 const candleCanvas = document.getElementById('candleChart');
 const rsiCanvas = document.getElementById('rsiChart');
 const macdCanvas = document.getElementById('macdChart');
-const CANDLE_W = 10, FUTURE_PAD = 70;
 
 function resizeCanvas(canvas, wrap, forcedWidth){
   const rect = wrap.getBoundingClientRect();
   const w = forcedWidth || rect.width;
-  canvas.width = w * devicePixelRatio; canvas.height = rect.height * devicePixelRatio;
-  canvas.style.width = w+'px'; canvas.style.height = rect.height+'px';
+  canvas.width = w * devicePixelRatio;
+  canvas.height = rect.height * devicePixelRatio;
+  canvas.style.width = w+'px';
+  canvas.style.height = rect.height+'px';
 }
+
+const CANDLE_W = 10;      // fixed pixel width per candle, packed close together
+const FUTURE_PAD = 70;    // blank space ahead of the last candle for "what's coming next"
+
 function drawCandles(){
   const scrollWrap = document.getElementById('chartScroll');
   const wrap = document.getElementById('candleWrap');
-  const visible = s.candles;
-  if(!visible || visible.length===0) return;
+  const visible = state.candles; // full history, scrollable
   const contentWidth = Math.max(wrap.getBoundingClientRect().width, visible.length*CANDLE_W + FUTURE_PAD);
-  const wasPinned = (scrollWrap.scrollWidth - scrollWrap.scrollLeft - scrollWrap.clientWidth) < CANDLE_W*3;
+
+  const wasPinnedToRight = (scrollWrap.scrollWidth - scrollWrap.scrollLeft - scrollWrap.clientWidth) < CANDLE_W*2;
+
   resizeCanvas(candleCanvas, wrap, contentWidth);
   const ctx = candleCanvas.getContext('2d');
   ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
   const W = candleCanvas.width/devicePixelRatio, H = candleCanvas.height/devicePixelRatio;
   ctx.clearRect(0,0,W,H);
-  const recent = visible.slice(-60);
-  const max = Math.max(...recent.map(c=>c.h)), min = Math.min(...recent.map(c=>c.l));
+
+  // scale using recent price action so the visible window stays readable
+  const recentForScale = state.candles.slice(-60);
+  const highs = recentForScale.map(c=>c.h), lows = recentForScale.map(c=>c.l);
+  const max = Math.max(...highs), min = Math.min(...lows);
   const pad = (max-min)*0.15 || 0.0005;
-  const top = max+pad, bottom = min-pad, range = top-bottom;
-  const cw = CANDLE_W; const y = p => H - ((p-bottom)/range)*H;
-  ctx.strokeStyle = 'rgba(255,255,255,0.04)'; ctx.lineWidth = 1;
-  for(let i=1;i<4;i++){ const gy=H*i/4; ctx.beginPath();ctx.moveTo(0,gy);ctx.lineTo(W,gy);ctx.stroke(); }
+  const top = max+pad, bottom = min-pad;
+  const range = top-bottom;
+
+  const cw = CANDLE_W;
+  const y = (price)=> H - ((price-bottom)/range)*H;
+
+  // grid
+  ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+  ctx.lineWidth = 1;
+  for(let i=1;i<4;i++){
+    const gy = H*i/4;
+    ctx.beginPath(); ctx.moveTo(0,gy); ctx.lineTo(W,gy); ctx.stroke();
+  }
+
   visible.forEach((c,i)=>{
-    const x = i*cw + cw/2; const isUp = c.c >= c.o;
-    ctx.strokeStyle = ctx.fillStyle = isUp ? '#21C87A' : '#F1495B'; ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(x,y(c.h)); ctx.lineTo(x,y(c.l)); ctx.stroke();
-    const bTop=y(Math.max(c.o,c.c)), bBot=y(Math.min(c.o,c.c));
-    const bw = Math.max(cw*0.72,2);
-    ctx.fillRect(x-bw/2, bTop, bw, Math.max(bBot-bTop,1));
+    const x = i*cw + cw/2;
+    const isUp = c.c >= c.o;
+    ctx.strokeStyle = isUp ? '#21C87A' : '#F1495B';
+    ctx.fillStyle = isUp ? '#21C87A' : '#F1495B';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(x, y(c.h));
+    ctx.lineTo(x, y(c.l));
+    ctx.stroke();
+    const bodyTop = y(Math.max(c.o,c.c));
+    const bodyBot = y(Math.min(c.o,c.c));
+    const bw = Math.max(cw*0.72, 2);
+    ctx.fillRect(x-bw/2, bodyTop, bw, Math.max(bodyBot-bodyTop,1));
   });
+
   const lastX = visible.length*cw;
-  ctx.setLineDash([4,4]); ctx.strokeStyle='rgba(255,255,255,0.35)';
-  ctx.beginPath(); ctx.moveTo(0,y(s.price)); ctx.lineTo(W,y(s.price)); ctx.stroke(); ctx.setLineDash([]);
-  ctx.fillStyle='#0B0F14'; ctx.fillRect(lastX+6, y(s.price)-9, 58,18);
-  ctx.strokeStyle='rgba(255,255,255,0.35)'; ctx.strokeRect(lastX+6, y(s.price)-9, 58,18);
-  ctx.fillStyle='#E8EDF2'; ctx.font='11px "JetBrains Mono"';
-  ctx.fillText(fmtPrice(s.price), lastX+10, y(s.price)+3);
-  if(s.activeTrade){
-    const t=s.activeTrade;
-    ctx.setLineDash([2,3]); ctx.strokeStyle = t.direction==='UP' ? '#21C87A' : '#F1495B'; ctx.lineWidth=1.5;
-    ctx.beginPath(); ctx.moveTo(0,y(t.entryPrice)); ctx.lineTo(W,y(t.entryPrice)); ctx.stroke(); ctx.setLineDash([]);
+
+  // current price dashed line — extends into the blank future space too
+  ctx.setLineDash([4,4]);
+  ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+  ctx.beginPath();
+  ctx.moveTo(0, y(state.price));
+  ctx.lineTo(W, y(state.price));
+  ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = '#0B0F14';
+  ctx.fillRect(lastX+6, y(state.price)-9, 58,18);
+  ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+  ctx.strokeRect(lastX+6, y(state.price)-9, 58,18);
+  ctx.fillStyle = '#E8EDF2';
+  ctx.font = '11px "JetBrains Mono"';
+  ctx.fillText(fmtPrice(state.price), lastX+10, y(state.price)+3);
+
+  // trade line
+  if(state.activeTrade){
+    const t = state.activeTrade;
+    const color = t.direction==='UP' ? '#21C87A' : '#F1495B';
+    ctx.setLineDash([2,3]);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(0, y(t.entryPrice));
+    ctx.lineTo(W, y(t.entryPrice));
+    ctx.stroke();
+    ctx.setLineDash([]);
   }
-  if(wasPinned) scrollWrap.scrollLeft = scrollWrap.scrollWidth;
-}
-function computeRSI(closes, period=14){
-  const rsi=[]; let gains=0, losses=0;
-  for(let i=1;i<closes.length;i++){
-    const diff=closes[i]-closes[i-1];
-    if(i<=period){ if(diff>=0) gains+=diff; else losses-=diff; rsi.push(null);
-      if(i===period){ const rs=gains/(losses||1e-9); rsi[rsi.length-1]=100-(100/(1+rs)); } continue; }
-    const gain=diff>0?diff:0, loss=diff<0?-diff:0;
-    gains=(gains*(period-1)+gain)/period; losses=(losses*(period-1)+loss)/period;
-    const rs=gains/(losses||1e-9); rsi.push(100-(100/(1+rs)));
+
+  // keep the view pinned to the live edge unless the person scrolled back to look at history
+  if(wasPinnedToRight){
+    scrollWrap.scrollLeft = scrollWrap.scrollWidth;
   }
-  return [null, ...rsi];
 }
-function ema(values, period){
-  const k=2/(period+1); const out=[]; let prev;
-  values.forEach(v=>{ if(v==null){out.push(null);return;} if(prev===undefined){prev=v;out.push(v);return;} prev=v*k+prev*(1-k); out.push(prev); });
-  return out;
-}
-function computeMACD(closes){
-  const e12=ema(closes,12), e26=ema(closes,26);
-  const macdLine=closes.map((_,i)=> (e12[i]!=null&&e26[i]!=null)?e12[i]-e26[i]:null);
-  const signalLine=ema(macdLine.map(v=>v==null?0:v),9);
-  const hist=macdLine.map((v,i)=> v!=null? v-signalLine[i]:null);
-  return {macdLine, signalLine, hist};
-}
+
 function drawLineIndicator(canvas, series, opts={}){
-  const wrap=canvas.parentElement; resizeCanvas(canvas, wrap);
-  const ctx=canvas.getContext('2d'); ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
-  const W=canvas.width/devicePixelRatio, H=canvas.height/devicePixelRatio; ctx.clearRect(0,0,W,H);
-  const vals=series.filter(v=>v!=null); if(vals.length<2) return;
-  const max=Math.max(...vals), min=Math.min(...vals), range=(max-min)||1;
-  const cw=W/series.length; const y=v=> H-((v-min)/range)*H*0.85-H*0.075;
-  if(opts.zones){ ctx.strokeStyle='rgba(255,255,255,0.06)';
-    [30,70].forEach(z=>{ const zy=H-((z-min)/range)*H*0.85-H*0.075; ctx.beginPath();ctx.moveTo(0,zy);ctx.lineTo(W,zy);ctx.stroke(); }); }
-  ctx.strokeStyle=opts.color||'#4C9AFF'; ctx.lineWidth=1.6; ctx.beginPath();
-  series.forEach((v,i)=>{ if(v==null) return; const x=i*cw+cw/2; if(i===0||series[i-1]==null) ctx.moveTo(x,y(v)); else ctx.lineTo(x,y(v)); });
+  const wrap = canvas.parentElement;
+  resizeCanvas(canvas, wrap);
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+  const W = canvas.width/devicePixelRatio, H = canvas.height/devicePixelRatio;
+  ctx.clearRect(0,0,W,H);
+  const vals = series.filter(v=>v!=null);
+  if(vals.length<2) return;
+  const max = Math.max(...vals), min = Math.min(...vals);
+  const range = (max-min)||1;
+  const cw = W/series.length;
+  const y = (v)=> H - ((v-min)/range)*H*0.85 - H*0.075;
+
+  if(opts.zones){
+    ctx.strokeStyle='rgba(255,255,255,0.06)';
+    [30,70].forEach(z=>{
+      const zy = H - ((z-min)/range)*H*0.85 - H*0.075;
+      ctx.beginPath();ctx.moveTo(0,zy);ctx.lineTo(W,zy);ctx.stroke();
+    });
+  }
+
+  ctx.strokeStyle = opts.color || '#4C9AFF';
+  ctx.lineWidth = 1.6;
+  ctx.beginPath();
+  series.forEach((v,i)=>{
+    if(v==null) return;
+    const x = i*cw + cw/2;
+    if(i===0 || series[i-1]==null) ctx.moveTo(x,y(v)); else ctx.lineTo(x,y(v));
+  });
   ctx.stroke();
 }
+
 function drawMACDPanel(){
-  const wrap=macdCanvas.parentElement; resizeCanvas(macdCanvas, wrap);
-  const ctx=macdCanvas.getContext('2d'); ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
-  const W=macdCanvas.width/devicePixelRatio, H=macdCanvas.height/devicePixelRatio; ctx.clearRect(0,0,W,H);
-  const closes=s.candles.slice(-40).map(c=>c.c);
-  const {macdLine, signalLine, hist}=computeMACD(closes);
-  const vals=[...macdLine,...signalLine,...hist].filter(v=>v!=null&&!isNaN(v)); if(vals.length<2) return;
-  const max=Math.max(...vals), min=Math.min(...vals), range=(max-min)||1;
-  const cw=W/macdLine.length; const y=v=> H-((v-min)/range)*H*0.85-H*0.075;
-  hist.forEach((v,i)=>{ if(v==null) return; const x=i*cw+cw/2;
+  const wrap = macdCanvas.parentElement;
+  resizeCanvas(macdCanvas, wrap);
+  const ctx = macdCanvas.getContext('2d');
+  ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+  const W = macdCanvas.width/devicePixelRatio, H = macdCanvas.height/devicePixelRatio;
+  ctx.clearRect(0,0,W,H);
+
+  const closes = state.candles.slice(-40).map(c=>c.c);
+  const {macdLine, signalLine, hist} = computeMACD(closes);
+  const vals = [...macdLine, ...signalLine, ...hist].filter(v=>v!=null && !isNaN(v));
+  if(vals.length<2) return;
+  const max = Math.max(...vals), min = Math.min(...vals);
+  const range = (max-min)||1;
+  const cw = W/macdLine.length;
+  const y = (v)=> H - ((v-min)/range)*H*0.85 - H*0.075;
+
+  hist.forEach((v,i)=>{
+    if(v==null) return;
+    const x = i*cw + cw/2;
     ctx.fillStyle = v>=0 ? 'rgba(33,200,122,0.55)' : 'rgba(241,73,91,0.55)';
-    const zeroY=y(0), vY=y(v); ctx.fillRect(x-cw*0.3, Math.min(zeroY,vY), Math.max(cw*0.6,1), Math.abs(vY-zeroY)); });
-  function line(series,color){ ctx.strokeStyle=color; ctx.lineWidth=1.4; ctx.beginPath();
-    series.forEach((v,i)=>{ if(v==null) return; const x=i*cw+cw/2; if(i===0||series[i-1]==null) ctx.moveTo(x,y(v)); else ctx.lineTo(x,y(v)); });
-    ctx.stroke(); }
-  line(macdLine,'#4C9AFF'); line(signalLine,'#F5A623');
-}
-function redrawIndicators(){
-  if(showRSI){ rsiCanvas.parentElement.style.display='block';
-    drawLineIndicator(rsiCanvas, computeRSI(s.candles.slice(-40).map(c=>c.c)), {color:'#4C9AFF', zones:true});
-  } else rsiCanvas.parentElement.style.display='none';
-  if(showMACD){ macdCanvas.parentElement.style.display='block'; drawMACDPanel(); }
-  else macdCanvas.parentElement.style.display='none';
-}
-
-// ---------------- RENDER ----------------
-function render(){
-  document.getElementById('topBalance').textContent = fmt(s.balance);
-  document.getElementById('upBtn').disabled = !!s.activeTrade;
-  document.getElementById('downBtn').disabled = !!s.activeTrade;
-  document.querySelectorAll('.time-select button').forEach(b=>{
-    b.classList.toggle('active', +b.dataset.sec === s.timeframeSeconds);
+    const zeroY = y(0);
+    const vY = y(v);
+    ctx.fillRect(x-cw*0.3, Math.min(zeroY,vY), Math.max(cw*0.6,1), Math.abs(vY-zeroY));
   });
-  const clock = document.getElementById('timerClock');
-  if(!s.activeTrade){ clock.classList.add('idle'); clock.textContent='No active trade'; }
-  else{
-    clock.classList.remove('idle');
-    const remaining = Math.max(0, Math.ceil((s.activeTrade.expiresAt - Date.now())/1000));
-    const mm=String(Math.floor(remaining/60)).padStart(2,'0'), ss=String(remaining%60).padStart(2,'0');
-    clock.textContent = `${mm}:${ss}`;
+
+  function line(series,color){
+    ctx.strokeStyle=color; ctx.lineWidth=1.4; ctx.beginPath();
+    series.forEach((v,i)=>{
+      if(v==null) return;
+      const x = i*cw+cw/2;
+      if(i===0||series[i-1]==null) ctx.moveTo(x,y(v)); else ctx.lineTo(x,y(v));
+    });
+    ctx.stroke();
   }
-  const rs = document.getElementById('resultStrip');
-  rs.innerHTML = s.tradeHistory.length===0 ? '<div class="empty-note">No trades yet</div>'
-    : s.tradeHistory.slice(0,8).map(r=>`
-      <div class="result-row ${r.win?'win':'lose'}">
-        <span class="dir">${r.direction} · ${new Date(r.time).toLocaleTimeString()}</span>
-        <span>${r.win? '+'+fmt(r.amount*PAYOUT) : '-'+fmt(r.amount)}</span>
-      </div>`).join('');
-  const th = document.getElementById('tradeHistoryList');
-  th.innerHTML = s.tradeHistory.length===0 ? '<div class="empty-note">No trades yet</div>'
-    : s.tradeHistory.map(r=>`
-      <div class="history-row"><div><div>${r.direction} ${r.win?'✅ WIN':'❌ LOSE'}</div>
-      <div class="meta">Entry ${fmtPrice(r.entry)} → Exit ${fmtPrice(r.exit)} · ${new Date(r.time).toLocaleTimeString()}</div></div>
-      <div style="color:${r.win?'#21C87A':'#F1495B'}">${r.win?'+':'-'}${fmt(r.win?r.amount*PAYOUT:r.amount)}</div></div>`).join('');
-  const bh = document.getElementById('balanceHistoryList');
-  bh.innerHTML = s.balanceHistory.length===0 ? '<div class="empty-note">No changes yet</div>'
-    : s.balanceHistory.slice(0,30).map(r=>`
-      <div class="history-row"><div><div>${r.note}</div><div class="meta">${new Date(r.time).toLocaleTimeString()}</div></div>
-      <div style="color:${r.delta>=0?'#21C87A':'#F1495B'}">${r.delta>=0?'+':''}${fmt(r.delta)}</div></div>`).join('');
-
-  const w1 = document.getElementById('walletBalanceDisplay'), w2 = document.getElementById('walletBalanceDisplay2');
-  const t1 = document.getElementById('tradeBalanceDisplay'), t2 = document.getElementById('tradeBalanceDisplay2');
-  if(w1) w1.childNodes[0].textContent = fmt(s.walletBalance);
-  if(w2) w2.childNodes[0].textContent = fmt(s.walletBalance);
-  if(t1) t1.childNodes[0].textContent = fmt(s.balance);
-  if(t2) t2.childNodes[0].textContent = fmt(s.balance);
-
-  drawCandles();
-  redrawIndicators();
+  line(macdLine, '#4C9AFF');
+  line(signalLine, '#F5A623');
 }
 
-// ---------------- TRADE / WALLET ACTIONS ----------------
+function redrawAll(){
+  drawCandles();
+  if(state.showRSI){
+    rsiCanvas.parentElement.style.display='block';
+    const closes = state.candles.slice(-40).map(c=>c.c);
+    drawLineIndicator(rsiCanvas, computeRSI(closes), {color:'#4C9AFF', zones:true});
+  } else { rsiCanvas.parentElement.style.display='none'; }
+
+  if(state.showMACD){
+    macdCanvas.parentElement.style.display='block';
+    drawMACDPanel();
+  } else { macdCanvas.parentElement.style.display='none'; }
+}
+
+// ============ TRADE LOGIC ============
+function placeTrade(direction){
+  if(state.activeTrade) return;
+  const amt = state.investAmount;
+  if(amt<=0 || amt>state.balance) return;
+  state.balance -= amt;
+  state.activeTrade = {
+    direction, entryPrice: state.price, amount: amt,
+    placedAt: Date.now(), expiresAt: Date.now()+state.timeframeSeconds*1000
+  };
+  pushBalanceHistory(-amt, `Trade opened (${direction})`);
+  updateBalanceUI();
+  updateButtons();
+  saveState();
+}
+
+function settleTrade(){
+  const t = state.activeTrade;
+  const win = (t.direction==='UP' && state.price>t.entryPrice) || (t.direction==='DOWN' && state.price<t.entryPrice);
+  let resultAmt = 0;
+  if(win){
+    resultAmt = t.amount * (1+PAYOUT);
+    state.balance += resultAmt;
+    pushBalanceHistory(resultAmt, `Trade won (${t.direction})`);
+  }
+  const record = {
+    direction:t.direction, entry:t.entryPrice, exit:state.price,
+    amount:t.amount, win, time: new Date().toLocaleTimeString()
+  };
+  state.tradeHistory.unshift(record);
+  renderResultStrip();
+  renderTradeHistoryList();
+  state.activeTrade = null;
+  updateBalanceUI();
+  updateButtons();
+  saveState();
+  showResultPopup(win, win ? resultAmt - t.amount : t.amount);
+}
+
+function showResultPopup(win, amount){
+  const popup = document.getElementById('resultPopup');
+  const label = document.getElementById('rpLabel');
+  const amt = document.getElementById('rpAmount');
+  label.textContent = win ? 'RESULT (WIN)' : 'RESULT (LOSE)';
+  amt.textContent = (win ? '+' : '-') + fmt(amount);
+  popup.classList.toggle('lose', !win);
+  popup.classList.add('show');
+  clearTimeout(showResultPopup._t);
+  showResultPopup._t = setTimeout(()=>{ popup.classList.remove('show'); }, 2200);
+}
+
+function flashGlow(el, success){
+  if(!el) return;
+  const cls = success ? 'flash-success' : 'flash-error';
+  el.classList.remove('flash-success','flash-error');
+  void el.offsetWidth; // restart animation if triggered again quickly
+  el.classList.add(cls);
+  setTimeout(()=>{ el.classList.remove(cls); }, 1300);
+}
+
+
+function pushBalanceHistory(delta, note){
+  state.balanceHistory.unshift({delta, note, time:new Date().toLocaleTimeString(), balance:state.balance+delta*0}); 
+  renderBalanceHistoryList();
+  saveState();
+}
+
+function updateBalanceUI(){
+  document.getElementById('topBalance').textContent = fmt(state.balance);
+  document.getElementById('sideBalance').childNodes[0].textContent = fmt(state.balance);
+  const w1 = document.getElementById('walletBalanceDisplay');
+  const w2 = document.getElementById('walletBalanceDisplay2');
+  const t1 = document.getElementById('tradeBalanceDisplay');
+  const t2 = document.getElementById('tradeBalanceDisplay2');
+  if(w1) w1.childNodes[0].textContent = fmt(state.walletBalance);
+  if(w2) w2.childNodes[0].textContent = fmt(state.walletBalance);
+  if(t1) t1.childNodes[0].textContent = fmt(state.balance);
+  if(t2) t2.childNodes[0].textContent = fmt(state.balance);
+}
+
+function updateButtons(){
+  const disabled = !!state.activeTrade;
+  document.getElementById('upBtn').disabled = disabled;
+  document.getElementById('downBtn').disabled = disabled;
+}
+
+function renderResultStrip(){
+  const el = document.getElementById('resultStrip');
+  if(state.tradeHistory.length===0){ el.innerHTML='<div class="empty-note">No trades yet — place one above</div>'; return; }
+  el.innerHTML = state.tradeHistory.slice(0,8).map(r=>`
+    <div class="result-row ${r.win?'win':'lose'}">
+      <span class="dir">${r.direction} · ${r.time}</span>
+      <span>${r.win? '+'+fmt(r.amount*PAYOUT) : '-'+fmt(r.amount)}</span>
+    </div>`).join('');
+}
+
+function renderTradeHistoryList(){
+  const el = document.getElementById('tradeHistoryList');
+  if(state.tradeHistory.length===0){ el.innerHTML='<div class="empty-note">No trades yet</div>'; return; }
+  el.innerHTML = state.tradeHistory.map(r=>`
+    <div class="history-row">
+      <div>
+        <div>${r.direction} ${r.win?'✅ WIN':'❌ LOSE'}</div>
+        <div class="meta">Entry ${fmtPrice(r.entry)} → Exit ${fmtPrice(r.exit)} · ${r.time}</div>
+      </div>
+      <div style="color:${r.win?'#21C87A':'#F1495B'}">${r.win?'+':'-'}${fmt(r.win?r.amount*PAYOUT:r.amount)}</div>
+    </div>`).join('');
+}
+
+function renderBalanceHistoryList(){
+  const el = document.getElementById('balanceHistoryList');
+  if(state.balanceHistory.length===0){ el.innerHTML='<div class="empty-note">No changes yet</div>'; return; }
+  el.innerHTML = state.balanceHistory.slice(0,30).map(r=>`
+    <div class="history-row">
+      <div><div>${r.note}</div><div class="meta">${r.time}</div></div>
+      <div style="color:${r.delta>=0?'#21C87A':'#F1495B'}">${r.delta>=0?'+':''}${fmt(r.delta)}</div>
+    </div>`).join('');
+}
+
+function renderDepositHistoryList(){
+  const el = document.getElementById('depositHistoryList');
+  if(state.depositHistory.length===0){ el.innerHTML='<div class="empty-note">No deposits yet</div>'; return; }
+  el.innerHTML = state.depositHistory.slice(0,30).map(r=>`
+    <div class="history-row">
+      <div><div>Deposit</div><div class="meta">${r.time}</div></div>
+      <div style="color:#21C87A">+${fmt(r.amount)}</div>
+    </div>`).join('');
+}
+
+function renderWithdrawHistoryList(){
+  const el = document.getElementById('withdrawHistoryList');
+  if(state.withdrawHistory.length===0){ el.innerHTML='<div class="empty-note">No withdrawals yet</div>'; return; }
+  el.innerHTML = state.withdrawHistory.slice(0,30).map(r=>`
+    <div class="history-row">
+      <div><div>Withdraw</div><div class="meta">${r.time}</div></div>
+      <div style="color:#F1495B">-${fmt(r.amount)}</div>
+    </div>`).join('');
+}
+
+// ============ TIMER ============
+function updateTimerUI(){
+  const clock = document.getElementById('timerClock');
+  if(!state.activeTrade){
+    clock.classList.add('idle');
+    clock.textContent = 'No active trade';
+    return;
+  }
+  clock.classList.remove('idle');
+  const remaining = Math.max(0, Math.ceil((state.activeTrade.expiresAt - Date.now())/1000));
+  const mm = String(Math.floor(remaining/60)).padStart(2,'0');
+  const ss = String(remaining%60).padStart(2,'0');
+  clock.textContent = `${mm}:${ss}`;
+  if(remaining<=0){ settleTrade(); }
+}
+
+// ============ MAIN LOOP ============
+setInterval(()=>{
+  tickPrice();
+  maybeShiftCandle();
+  redrawAll();
+  updateTimerUI();
+}, 1000);
+
+setInterval(saveState, 4000);
+window.addEventListener('beforeunload', saveState);
+
+window.addEventListener('resize', redrawAll);
+
+// ============ AUTH: gate the app behind Sign Up / Log In ============
+const authScreen = document.getElementById('authScreen');
+let authMode = 'login'; // or 'signup'
+
+function enterApp(username){
+  currentUser = username;
+  localStorage.setItem(SESSION_KEY, username);
+  authScreen.classList.add('hidden');
+  loadStateAndInit();
+}
+
+const existingSession = localStorage.getItem(SESSION_KEY);
+if(existingSession){
+  enterApp(existingSession);
+} else {
+  authScreen.classList.remove('hidden');
+}
+
+function setAuthMode(mode){
+  authMode = mode;
+  document.getElementById('authTabLogin').classList.toggle('active', mode === 'login');
+  document.getElementById('authTabSignup').classList.toggle('active', mode === 'signup');
+  document.getElementById('authSubmitBtn').textContent = mode === 'login' ? 'Log In' : 'Complete Registration';
+  document.getElementById('authNote').textContent = '';
+  document.getElementById('fullNameField').style.display = mode === 'signup' ? 'block' : 'none';
+}
+document.getElementById('authTabLogin').onclick = ()=> setAuthMode('login');
+document.getElementById('authTabSignup').onclick = ()=> setAuthMode('signup');
+
+document.getElementById('authSubmitBtn').onclick = ()=>{
+  const usernameRaw = document.getElementById('authUsername').value.trim();
+  const username = usernameRaw.toLowerCase();
+  const password = document.getElementById('authPassword').value;
+  const fullName = document.getElementById('authFullName').value.trim();
+  const note = document.getElementById('authNote');
+  if(username.length < 3){
+    note.textContent = 'Mobile number must be at least 3 characters';
+    note.style.color = '#F1495B';
+    return;
+  }
+  if(authMode === 'signup' && fullName.length < 2){
+    note.textContent = 'Please enter your full name';
+    note.style.color = '#F1495B';
+    return;
+  }
+  if(password.length < 4){
+    note.textContent = 'Password must be at least 4 characters';
+    note.style.color = '#F1495B';
+    return;
+  }
+  const users = getUsers();
+  if(authMode === 'signup'){
+    if(users[username]){
+      note.textContent = 'That mobile number is already registered';
+      note.style.color = '#F1495B';
+      return;
+    }
+    users[username] = {
+      password,
+      fullName,
+      createdAt: new Date().toISOString()
+    };
+    saveUsers(users);
+    document.getElementById('authPassword').value = '';
+    setAuthMode('login');
+    document.getElementById('authUsername').value = username;
+    const noteEl = document.getElementById('authNote');
+    noteEl.textContent = 'Registration complete — please log in to continue';
+    noteEl.style.color = '#21C87A';
+  } else {
+    const record = users[username];
+    const storedPassword = record && typeof record === 'object' ? record.password : record;
+    if(!record || storedPassword !== password){
+      note.textContent = 'Incorrect mobile number or password';
+      note.style.color = '#F1495B';
+      return;
+    }
+    enterApp(username);
+  }
+};
+
+document.getElementById('logoutBtn').onclick = ()=>{
+  saveState();
+  localStorage.removeItem(SESSION_KEY);
+  currentUser = null;
+  closeMenu();
+  document.getElementById('authUsername').value = '';
+  document.getElementById('authPassword').value = '';
+  document.getElementById('authFullName').value = '';
+  setAuthMode('login');
+  authScreen.classList.remove('hidden');
+};
+
+// ============ UI WIRING ============
 document.getElementById('upBtn').onclick = ()=>placeTrade('UP');
 document.getElementById('downBtn').onclick = ()=>placeTrade('DOWN');
-async function placeTrade(direction){
-  try{
-    await api('/api/trade', { method:'POST', body: JSON.stringify({ direction, amount: investAmount, timeframeSeconds: s.timeframeSeconds }) });
-    await pollState();
-  }catch(e){ alert(e.message); }
-}
+
 document.querySelectorAll('.time-select button').forEach(btn=>{
-  btn.onclick = ()=>{ document.querySelectorAll('.time-select button').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); s.timeframeSeconds = +btn.dataset.sec; };
+  btn.onclick = ()=>{
+    document.querySelectorAll('.time-select button').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    state.timeframeSeconds = +btn.dataset.sec;
+    saveState();
+  };
 });
+
 const investInput = document.getElementById('investInput');
-investInput.oninput = ()=>{ investAmount = Math.max(1, +investInput.value || 1); };
-document.querySelectorAll('.invest-quick button').forEach(b=>{ b.onclick = ()=>{ investInput.value = b.dataset.amt; investAmount = +b.dataset.amt; }; });
-document.getElementById('toggleRSI').onclick = (e)=>{ showRSI=!showRSI; e.target.classList.toggle('active', showRSI); redrawIndicators(); };
-document.getElementById('toggleMACD').onclick = (e)=>{ showMACD=!showMACD; e.target.classList.toggle('active', showMACD); redrawIndicators(); };
+investInput.oninput = ()=>{ state.investAmount = Math.max(1, +investInput.value || 1); saveState(); };
+document.querySelectorAll('.invest-quick button[data-amt]').forEach(b=>{
+  b.onclick = ()=>{ investInput.value = b.dataset.amt; state.investAmount = +b.dataset.amt; saveState(); };
+});
 
-document.getElementById('depositSubmit').onclick = async ()=>{
-  const amt = Math.max(1, +document.getElementById('depositInput').value || 0);
-  const txid = document.getElementById('depositTxid').value.trim();
-  const note = document.getElementById('depositNote');
-  try{
-    await api('/api/deposit-request', {method:'POST', body: JSON.stringify({amount: amt, txid})});
-    document.getElementById('depositTxid').value = '';
-    note.textContent = 'Request submitted — waiting for admin approval';
-    note.style.color = '#F5A623';
-    await renderMyDepositRequests();
-  }catch(e){ note.textContent = e.message; note.style.color='#F1495B'; }
-};
-document.getElementById('claimDepositSubmit').onclick = async ()=>{
-  const pwd = document.getElementById('claimPasswordInput').value.trim();
-  const note = document.getElementById('claimNote');
-  try{
-    const data = await api('/api/claim-deposit', {method:'POST', body: JSON.stringify({password: pwd})});
-    document.getElementById('claimPasswordInput').value = '';
-    note.textContent = `Deposited ${fmt(data.amount)} to your Wallet`;
-    note.style.color = '#21C87A';
-    await pollState();
-    await renderMyDepositRequests();
-  }catch(e){ note.textContent = e.message; note.style.color='#F1495B'; }
-};
-async function renderMyDepositRequests(){
-  const el = document.getElementById('myDepositRequestsList');
-  if(!el) return;
-  try{
-    const data = await api('/api/my-deposit-requests');
-    const mine = data.requests;
-    if(mine.length===0){ el.innerHTML = '<div class="empty-note">No requests yet</div>'; return; }
-    el.innerHTML = mine.map(r=>{
-      const statusLabel = r.status==='pending' ? '⏳ Pending' : r.status==='approved' ? `✅ Code: ${r.unlock_password}` : r.status==='rejected' ? '❌ Rejected' : '✔️ Completed';
-      const statusColor = r.status==='pending' ? 'var(--amber)' : r.status==='approved' ? 'var(--up)' : r.status==='rejected' ? 'var(--down)' : 'var(--muted)';
-      return `<div class="history-row"><div><div>${fmt(r.amount)} ${r.txid?'· '+r.txid:''}</div><div class="meta">${new Date(r.requested_at).toLocaleString()}</div></div><div style="color:${statusColor};font-size:11px;text-align:right;">${statusLabel}</div></div>`;
-    }).join('');
-  }catch(e){}
-}
-document.getElementById('transferSubmit').onclick = async ()=>{
-  const amt = Math.max(1, +document.getElementById('transferInput').value || 0);
-  const note = document.getElementById('transferNote');
-  try{ await api('/api/transfer-to-trade', {method:'POST', body: JSON.stringify({amount: amt})}); note.textContent='Transferred'; note.style.color=''; await pollState(); }
-  catch(e){ note.textContent = e.message; note.style.color='#F1495B'; }
-};
-document.getElementById('reverseTransferSubmit').onclick = async ()=>{
-  const amt = Math.max(1, +document.getElementById('reverseTransferInput').value || 0);
-  const note = document.getElementById('reverseTransferNote');
-  try{ await api('/api/transfer-to-wallet', {method:'POST', body: JSON.stringify({amount: amt})}); note.textContent='Moved to wallet'; note.style.color=''; await pollState(); }
-  catch(e){ note.textContent = e.message; note.style.color='#F1495B'; }
-};
-document.getElementById('withdrawSubmit').onclick = async ()=>{
-  const amt = Math.max(1, +document.getElementById('withdrawInput').value || 0);
-  const withdrawNumber = document.getElementById('withdrawNumber').value.trim();
-  const note = document.getElementById('withdrawNote');
-  try{
-    await api('/api/withdraw-request', {method:'POST', body: JSON.stringify({amount: amt, withdrawNumber})});
-    document.getElementById('withdrawNumber').value = '';
-    note.textContent = 'Request submitted — waiting for admin approval';
-    note.style.color = '#F5A623';
-    await pollState();
-    await renderMyWithdrawRequests();
-  }catch(e){ note.textContent = e.message; note.style.color='#F1495B'; }
-};
-async function renderMyWithdrawRequests(){
-  const el = document.getElementById('myWithdrawRequestsList');
-  if(!el) return;
-  try{
-    const data = await api('/api/my-withdraw-requests');
-    const mine = data.requests;
-    if(mine.length===0){ el.innerHTML = '<div class="empty-note">No requests yet</div>'; return; }
-    el.innerHTML = mine.map(r=>{
-      const statusLabel = r.status==='pending' ? '⏳ Pending' : r.status==='approved' ? '✔️ Approved' : '❌ Rejected — refunded';
-      const statusColor = r.status==='pending' ? 'var(--amber)' : r.status==='approved' ? 'var(--up)' : 'var(--down)';
-      return `<div class="history-row"><div><div>${fmt(r.amount)}</div><div class="meta">${r.withdraw_number?r.withdraw_number+' · ':''}${new Date(r.requested_at).toLocaleString()}</div></div><div style="color:${statusColor};font-size:11px;text-align:right;">${statusLabel}</div></div>`;
-    }).join('');
-  }catch(e){}
-}
+document.getElementById('toggleRSI').onclick = (e)=>{ state.showRSI=!state.showRSI; e.target.classList.toggle('active', state.showRSI); redrawAll(); };
+document.getElementById('toggleMACD').onclick = (e)=>{ state.showMACD=!state.showMACD; e.target.classList.toggle('active', state.showMACD); redrawAll(); };
 
-// ---------------- LIVE CHAT ----------------
-document.getElementById('chatMessageSubmit').onclick = async ()=>{
-  const input = document.getElementById('chatMessageInput');
-  const message = input.value.trim();
-  const note = document.getElementById('chatMessageNote');
-  if(!message){ note.textContent='Type a message first'; note.style.color='#F1495B'; return; }
-  try{
-    await api('/api/message', {method:'POST', body: JSON.stringify({message})});
-    input.value='';
-    note.textContent='Sent to Admin'; note.style.color='#21C87A';
-    await renderMyMessages();
-  }catch(e){ note.textContent = e.message; note.style.color='#F1495B'; }
-};
-document.getElementById('chatMessageInput').addEventListener('keydown', (e)=>{ if(e.key==='Enter') document.getElementById('chatMessageSubmit').click(); });
-async function renderMyMessages(){
-  const el = document.getElementById('myMessagesList');
-  if(!el) return;
-  try{
-    const data = await api('/api/my-messages');
-    const mine = data.messages;
-    if(mine.length===0){ el.innerHTML = '<div class="empty-note">No messages yet — say hello!</div>'; return; }
-    let html = '';
-    mine.forEach(m=>{
-      html += `<div class="chat-bubble-row mine"><div class="chat-bubble mine">${m.message}<div class="chat-meta">${new Date(m.sent_at).toLocaleTimeString()}</div></div></div>`;
-      if(m.reply){
-        html += `<div class="chat-bubble-row theirs"><div class="chat-bubble theirs"><span class="chat-label">Admin</span>${m.reply}<div class="chat-meta">${new Date(m.replied_at).toLocaleTimeString()}</div></div></div>`;
-      }
-    });
-    el.innerHTML = html;
-    el.scrollTop = el.scrollHeight;
-  }catch(e){}
-}
-
-// ---------------- MENU ----------------
+// Menu
 const overlay = document.getElementById('overlay');
 const sideMenu = document.getElementById('sideMenu');
 document.getElementById('menuBtn').onclick = ()=>{ overlay.classList.add('open'); sideMenu.classList.add('open'); };
 document.getElementById('menuClose').onclick = closeMenu;
 overlay.onclick = closeMenu;
 function closeMenu(){ overlay.classList.remove('open'); sideMenu.classList.remove('open'); }
+
 document.querySelectorAll('[data-view]').forEach(el=>{
   el.addEventListener('click', ()=>{
     const target = el.dataset.view;
     if(target==='main' && el.id==='navHome'){ closeMenu(); return; }
     document.querySelectorAll('.menu-view').forEach(v=>v.classList.remove('active'));
     document.getElementById('view-'+target).classList.add('active');
-    if(target==='deposit') renderMyDepositRequests();
-    if(target==='withdraw') renderMyWithdrawRequests();
-    if(target==='chat') renderMyMessages();
+    if(target === 'admin'){ renderAdminUsersList(); renderAdminDepositRequests(); renderAdminWithdrawRequests(); renderAdminMessages(); }
+    if(target === 'contactadmin'){ renderMyMessages(); }
   });
 });
 document.querySelectorAll('[data-back]').forEach(el=>{
-  el.onclick = ()=>{ document.querySelectorAll('.menu-view').forEach(v=>v.classList.remove('active')); document.getElementById('view-main').classList.add('active'); };
+  el.onclick = ()=>{
+    document.querySelectorAll('.menu-view').forEach(v=>v.classList.remove('active'));
+    document.getElementById('view-main').classList.add('active');
+  };
 });
-window.addEventListener('resize', ()=>{ drawCandles(); redrawIndicators(); });
 
-// ---------------- ADMIN PANEL (separate from user login; tap logo 5x) ----------------
+// ============ HIDDEN ADMIN PANEL (visit #admin, then unlock with a password) ============
+const ADMIN_PASSWORD = 'jokernx2';
 const adminOverlay = document.getElementById('adminOverlay');
 const adminModal = document.getElementById('adminModal');
-let brandTapCount = 0, brandTapTimer = null;
+
+function checkAdminHash(){
+  if(location.hash === '#admin'){
+    adminOverlay.classList.add('open');
+    adminModal.classList.add('open');
+    document.getElementById('adminPasswordInput').focus();
+  }
+}
+window.addEventListener('hashchange', checkAdminHash);
+checkAdminHash();
+
+// Reliable alternative trigger: tap the "Trendex Pro" logo 5 times within 2 seconds
+let brandTapCount = 0;
+let brandTapTimer = null;
 document.getElementById('brandName').addEventListener('click', ()=>{
   brandTapCount++;
   clearTimeout(brandTapTimer);
   brandTapTimer = setTimeout(()=>{ brandTapCount = 0; }, 2000);
   if(brandTapCount >= 5){
     brandTapCount = 0;
-    adminOverlay.classList.add('open'); adminModal.classList.add('open');
+    adminOverlay.classList.add('open');
+    adminModal.classList.add('open');
     document.getElementById('adminPasswordInput').focus();
   }
 });
-adminOverlay.onclick = closeAdmin;
-document.getElementById('adminCloseBtn').onclick = closeAdmin;
-function closeAdmin(){
-  adminOverlay.classList.remove('open'); adminModal.classList.remove('open');
-  document.getElementById('adminPasswordInput').value='';
-  document.getElementById('adminUsersWrap').style.display='none';
-  document.getElementById('adminLoginNote').textContent='';
+
+function closeAdminModal(){
+  adminOverlay.classList.remove('open');
+  adminModal.classList.remove('open');
+  document.getElementById('adminPasswordInput').value = '';
+  document.getElementById('adminLoginNote').textContent = '';
+  try{ history.replaceState(null, '', location.pathname + location.search); }catch(e){ /* not available in sandboxed preview — harmless */ }
 }
-document.getElementById('adminUnlockBtn').onclick = async ()=>{
-  const pwd = document.getElementById('adminPasswordInput').value;
+adminOverlay.onclick = closeAdminModal;
+
+document.getElementById('adminUnlockBtn').onclick = ()=>{
+  const val = document.getElementById('adminPasswordInput').value;
   const note = document.getElementById('adminLoginNote');
-  try{
-    const res = await fetch('/api/admin/users?password=' + encodeURIComponent(pwd));
-    if(!res.ok){ const e = await res.json(); throw new Error(e.error || 'Failed'); }
-    const data = await res.json();
-    note.textContent = '';
-    adminPassword = pwd;
-    document.getElementById('adminUsersWrap').style.display = 'block';
-    document.getElementById('adminUserCount').textContent = data.users.length;
-    const list = document.getElementById('adminUsersList');
-    list.innerHTML = data.users.length===0 ? '<div class="empty-note">No accounts yet</div>' : data.users.map(u=>`
-      <div class="history-row">
-        <div>
-          <div>${u.username}</div>
-          <div class="meta">Joined: ${new Date(u.createdAt).toLocaleString()} · Trades: ${u.tradeCount}</div>
-        </div>
-        <div style="text-align:right;">
-          <div style="color:var(--info)">Trade: ${fmt(u.balance)}</div>
-          <div style="color:var(--up)">Wallet: ${fmt(u.walletBalance)}</div>
-        </div>
-      </div>`).join('');
-    await renderAdminDepositRequests();
-    await renderAdminWithdrawRequests();
-    await renderAdminMessages();
-  }catch(e){
-    note.textContent = e.message;
+  if(val !== ADMIN_PASSWORD){
+    note.textContent = 'Incorrect admin password';
     note.style.color = '#F1495B';
+    return;
   }
+  closeAdminModal();
+  document.querySelectorAll('.menu-view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-admin').classList.add('active');
+  renderAdminUsersList();
+  renderAdminDepositRequests();
+  renderAdminWithdrawRequests();
+  renderAdminMessages();
+  document.getElementById('adminUsersList').style.display = 'none';
+  document.getElementById('adminDepositRequestsList').style.display = 'none';
+  document.getElementById('adminWithdrawRequestsList').style.display = 'none';
+  document.getElementById('adminMessagesList').style.display = 'none';
+  overlay.classList.add('open');
+  sideMenu.classList.add('open');
 };
 
-let adminPassword = '';
+document.getElementById('adminUsersToggle').onclick = ()=>{
+  const list = document.getElementById('adminUsersList');
+  list.style.display = (list.style.display === 'none') ? 'flex' : 'none';
+};
 
-async function renderAdminDepositRequests(){
-  const listEl = document.getElementById('adminDepositRequestsList');
-  const countEl = document.getElementById('adminDepositPendingCount');
-  if(!listEl || !adminPassword) return;
-  const res = await fetch('/api/admin/deposit-requests?password=' + encodeURIComponent(adminPassword));
-  if(!res.ok) return;
-  const data = await res.json();
-  const pending = data.requests.filter(r=>r.status==='pending');
-  const resolved = data.requests.filter(r=>r.status!=='pending');
-  countEl.textContent = pending.length;
-  const pendingHtml = pending.map(r=>`
-    <div class="history-row">
-      <div><div>${r.username} — ${fmt(r.amount)}</div><div class="meta">${r.txid?'TxID: '+r.txid+' · ':''}${new Date(r.requested_at).toLocaleString()}</div></div>
-      <div style="display:flex;gap:6px;flex-shrink:0;">
-        <button class="verify-submit" style="width:auto;padding:8px 14px;margin:0;" data-approve-dep="${r.id}">Approve</button>
-        <button class="verify-submit" style="width:auto;padding:8px 14px;margin:0;background:var(--down);" data-reject-dep="${r.id}">Reject</button>
-      </div>
-    </div>`).join('');
-  const resolvedHtml = resolved.map(r=>{
-    const rej = r.status==='rejected';
-    return `<div class="history-row" style="${rej?'border-color:rgba(241,73,91,0.35);':''}">
-      <div><div style="color:${rej?'var(--down)':'var(--up)'};">${r.username} — ${fmt(r.amount)} · ${rej?'Rejected':'Approved: '+r.unlock_password}</div>
-      <div class="meta" style="${rej?'color:var(--down);':''}">${new Date(r.approved_at||r.requested_at).toLocaleString()}</div></div></div>`;
+document.getElementById('adminDepositRequestsToggle').onclick = ()=>{
+  const list = document.getElementById('adminDepositRequestsList');
+  list.style.display = (list.style.display === 'none') ? 'flex' : 'none';
+};
+
+document.getElementById('myDepositRequestsToggle').onclick = ()=>{
+  const list = document.getElementById('myDepositRequestsList');
+  list.style.display = (list.style.display === 'none') ? 'flex' : 'none';
+};
+
+document.getElementById('myWithdrawRequestsToggle').onclick = ()=>{
+  const list = document.getElementById('myWithdrawRequestsList');
+  list.style.display = (list.style.display === 'none') ? 'flex' : 'none';
+};
+
+document.getElementById('adminWithdrawRequestsToggle').onclick = ()=>{
+  const list = document.getElementById('adminWithdrawRequestsList');
+  list.style.display = (list.style.display === 'none') ? 'flex' : 'none';
+};
+
+document.getElementById('depositHistoryToggle').onclick = ()=>{
+  const list = document.getElementById('depositHistoryList');
+  list.style.display = (list.style.display === 'none') ? 'flex' : 'none';
+};
+
+document.getElementById('withdrawHistoryToggle').onclick = ()=>{
+  const list = document.getElementById('withdrawHistoryList');
+  list.style.display = (list.style.display === 'none') ? 'flex' : 'none';
+};
+
+document.getElementById('adminMessagesToggle').onclick = ()=>{
+  const list = document.getElementById('adminMessagesList');
+  list.style.display = (list.style.display === 'none') ? 'flex' : 'none';
+};
+
+document.getElementById('adminMessageSubmit').onclick = ()=>{
+  const input = document.getElementById('adminMessageInput');
+  const message = input.value.trim();
+  const note = document.getElementById('adminMessageNote');
+  const btn = document.getElementById('adminMessageSubmit');
+  if(!message){
+    note.textContent = 'Type a message first';
+    note.style.color = '#F1495B';
+    flashGlow(btn, false);
+    return;
+  }
+  const messages = getAdminMessages();
+  messages.unshift({
+    id: 'MSG' + Date.now() + Math.floor(Math.random()*1000),
+    username: currentUser,
+    message: message,
+    reply: null,
+    repliedAt: null,
+    sentAt: new Date().toISOString(),
+  });
+  saveAdminMessages(messages);
+  input.value = '';
+  note.textContent = 'Sent to Admin';
+  note.style.color = '#21C87A';
+  renderMyMessages();
+  flashGlow(btn, true);
+};
+document.getElementById('adminMessageInput').addEventListener('keydown', (e)=>{
+  if(e.key === 'Enter') document.getElementById('adminMessageSubmit').click();
+});
+
+document.getElementById('adminResetBtn').onclick = ()=>{
+  state.balance = 0;
+  state.walletBalance = 0;
+  state.tradeHistory = [];
+  state.balanceHistory = [];
+  state.depositHistory = [];
+  state.withdrawHistory = [];
+  state.activeTrade = null;
+  updateBalanceUI();
+  updateButtons();
+  renderResultStrip();
+  renderTradeHistoryList();
+  renderBalanceHistoryList();
+  renderDepositHistoryList();
+  renderWithdrawHistoryList();
+  renderMyDepositRequests();
+  renderMyWithdrawRequests();
+  closeMenu();
+  saveState();
+};
+
+document.getElementById('verifySubmit').onclick = ()=>{
+  const val = document.getElementById('phoneInput').value.trim();
+  if(val.length<6) return;
+  state.phone = val; state.verified = true;
+  document.getElementById('verifiedNote').innerHTML = `<div class="verified-badge">✓ Profile verified with ${val}</div>`;
+  saveState();
+};
+
+document.getElementById('depositSubmit').onclick = ()=>{
+  const amt = Math.max(1, +document.getElementById('depositInput').value || 0);
+  const depositNumber = document.getElementById('depositNumber').value.trim();
+  const txid = document.getElementById('depositTxid').value.trim();
+  const dnote = document.getElementById('depositNote');
+
+  const requests = getDepositRequests();
+  requests.unshift({
+    id: 'DR' + Date.now() + Math.floor(Math.random()*1000),
+    username: currentUser,
+    amount: amt,
+    depositNumber: depositNumber,
+    txid: txid,
+    status: 'pending',
+    unlockPassword: null,
+    requestedAt: new Date().toISOString(),
+  });
+  saveDepositRequests(requests);
+
+  document.getElementById('depositNumber').value = '';
+  document.getElementById('depositTxid').value = '';
+  dnote.textContent = 'Request submitted — waiting for admin approval';
+  dnote.style.color = '#F5A623';
+  renderMyDepositRequests();
+  flashGlow(document.getElementById('depositSubmit'), true);
+};
+document.querySelectorAll('[data-dep]').forEach(b=>{
+  b.onclick = ()=>{ document.getElementById('depositInput').value = b.dataset.dep; };
+});
+
+function renderMyDepositRequests(){
+  const el = document.getElementById('myDepositRequestsList');
+  if(!el) return;
+  const mine = getDepositRequests().filter(r => r.username === currentUser);
+  const countEl = document.getElementById('myDepositRequestCount');
+  if(countEl) countEl.textContent = mine.length;
+  if(mine.length === 0){ el.innerHTML = '<div class="empty-note">No requests yet</div>'; return; }
+  el.innerHTML = mine.map(r=>{
+    if(r.status === 'approved'){
+      return `
+        <div class="history-row">
+          <div>
+            <div>${fmt(r.amount)} ${r.txid ? '· '+r.txid : ''}</div>
+            <div class="meta">${r.depositNumber ? r.depositNumber+' · ' : ''}${new Date(r.requestedAt).toLocaleString()}</div>
+            <div class="meta" style="color:var(--up);margin-top:4px;">✅ Approved — code: <span style="color:var(--info);font-family:var(--font-mono);font-weight:700;">${r.unlockPassword}</span></div>
+          </div>
+        </div>`;
+    }
+    const statusLabel = r.status === 'pending' ? '⏳ Pending'
+      : r.status === 'rejected' ? '❌ Rejected'
+      : '✔️ Completed';
+    const statusColor = r.status === 'pending' ? 'var(--amber)'
+      : r.status === 'rejected' ? 'var(--down)'
+      : 'var(--muted)';
+    return `
+      <div class="history-row">
+        <div>
+          <div>${fmt(r.amount)} ${r.txid ? '· '+r.txid : ''}</div>
+          <div class="meta">${r.depositNumber ? r.depositNumber+' · ' : ''}${new Date(r.requestedAt).toLocaleString()}</div>
+        </div>
+        <div style="color:${statusColor};font-size:11px;text-align:right;">${statusLabel}</div>
+      </div>`;
   }).join('');
-  listEl.innerHTML = (pendingHtml + resolvedHtml) || '<div class="empty-note">No pending requests</div>';
-  listEl.querySelectorAll('[data-approve-dep]').forEach(btn=>{
-    btn.onclick = async ()=>{
-      await fetch('/api/admin/approve-deposit', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({password: adminPassword, id: btn.dataset.approveDep})});
-      renderAdminDepositRequests();
-    };
-  });
-  listEl.querySelectorAll('[data-reject-dep]').forEach(btn=>{
-    btn.onclick = async ()=>{
-      await fetch('/api/admin/reject-deposit', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({password: adminPassword, id: btn.dataset.rejectDep})});
-      renderAdminDepositRequests();
-    };
-  });
 }
 
-async function renderAdminWithdrawRequests(){
-  const listEl = document.getElementById('adminWithdrawRequestsList');
-  const countEl = document.getElementById('adminWithdrawPendingCount');
-  if(!listEl || !adminPassword) return;
-  const res = await fetch('/api/admin/withdraw-requests?password=' + encodeURIComponent(adminPassword));
-  if(!res.ok) return;
-  const data = await res.json();
-  const pending = data.requests.filter(r=>r.status==='pending');
-  const resolved = data.requests.filter(r=>r.status!=='pending');
-  countEl.textContent = pending.length;
-  const pendingHtml = pending.map(r=>`
-    <div class="history-row">
-      <div><div>${r.username} — ${fmt(r.amount)}</div><div class="meta">${r.withdraw_number?'Number: '+r.withdraw_number+' · ':''}${new Date(r.requested_at).toLocaleString()}</div></div>
-      <div style="display:flex;gap:6px;flex-shrink:0;">
-        <button class="verify-submit" style="width:auto;padding:8px 14px;margin:0;" data-approve-wd="${r.id}">Approve</button>
-        <button class="verify-submit" style="width:auto;padding:8px 14px;margin:0;background:var(--down);" data-reject-wd="${r.id}">Reject</button>
-      </div>
-    </div>`).join('');
-  const resolvedHtml = resolved.map(r=>{
-    const rej = r.status==='rejected';
-    return `<div class="history-row" style="${rej?'border-color:rgba(241,73,91,0.35);':''}">
-      <div><div style="color:${rej?'var(--down)':'var(--up)'};">${r.username} — ${fmt(r.amount)} · ${rej?'Rejected — refunded':'Approved'}</div>
-      <div class="meta" style="${rej?'color:var(--down);':''}">${new Date(r.resolved_at||r.requested_at).toLocaleString()}</div></div></div>`;
+document.getElementById('claimDepositSubmit').onclick = ()=>{
+  const pwd = document.getElementById('claimPasswordInput').value.trim();
+  const note = document.getElementById('claimNote');
+  const btn = document.getElementById('claimDepositSubmit');
+  if(!pwd){
+    note.textContent = 'Enter the password your admin gave you';
+    note.style.color = '#F1495B';
+    flashGlow(btn, false);
+    return;
+  }
+  const requests = getDepositRequests();
+  const match = requests.find(r => r.username === currentUser && r.status === 'approved' && r.unlockPassword === pwd);
+  if(!match){
+    note.textContent = 'Incorrect password, or no approved request matches it';
+    note.style.color = '#F1495B';
+    flashGlow(btn, false);
+    return;
+  }
+  state.walletBalance += match.amount;
+  state.depositHistory.unshift({amount: match.amount, time:new Date().toLocaleTimeString()});
+  match.status = 'completed';
+  saveDepositRequests(requests);
+  renderDepositHistoryList();
+  renderMyDepositRequests();
+  updateBalanceUI();
+  saveState();
+  document.getElementById('claimPasswordInput').value = '';
+  note.textContent = `Deposited ${fmt(match.amount)} to your Wallet`;
+  note.style.color = '#21C87A';
+  flashGlow(btn, true);
+};
+
+document.getElementById('transferSubmit').onclick = ()=>{
+  const amt = Math.max(1, +document.getElementById('transferInput').value || 0);
+  const note = document.getElementById('transferNote');
+  const btn = document.getElementById('transferSubmit');
+  if(amt > state.walletBalance){
+    note.textContent = 'Insufficient Wallet Balance for this transfer';
+    note.style.color = '#F1495B';
+    flashGlow(btn, false);
+    return;
+  }
+  state.walletBalance -= amt;
+  state.balance += amt;
+  pushBalanceHistory(amt, 'Transferred from Wallet');
+  note.textContent = 'Moves funds from Wallet into your Trade Balance';
+  note.style.color = '';
+  updateBalanceUI();
+  saveState();
+  flashGlow(btn, true);
+};
+
+document.getElementById('reverseTransferSubmit').onclick = ()=>{
+  const amt = Math.max(1, +document.getElementById('reverseTransferInput').value || 0);
+  const note = document.getElementById('reverseTransferNote');
+  const btn = document.getElementById('reverseTransferSubmit');
+  if(amt > state.balance){
+    note.textContent = 'Insufficient Trade Balance for this transfer';
+    note.style.color = '#F1495B';
+    flashGlow(btn, false);
+    return;
+  }
+  state.balance -= amt;
+  state.walletBalance += amt;
+  pushBalanceHistory(-amt, 'Moved to Wallet');
+  note.textContent = 'Moves funds from Trade Balance into your Wallet';
+  note.style.color = '';
+  updateBalanceUI();
+  saveState();
+  flashGlow(btn, true);
+};
+
+document.getElementById('withdrawSubmit').onclick = ()=>{
+  const amt = Math.max(1, +document.getElementById('withdrawInput').value || 0);
+  const withdrawNumber = document.getElementById('withdrawNumber').value.trim();
+  const note = document.getElementById('withdrawNote');
+  const btn = document.getElementById('withdrawSubmit');
+  if(amt > state.walletBalance){
+    note.textContent = 'Insufficient Wallet Balance for this withdrawal';
+    note.style.color = '#F1495B';
+    flashGlow(btn, false);
+    return;
+  }
+  // lock the funds while the request is pending
+  state.walletBalance -= amt;
+  updateBalanceUI();
+  saveState();
+
+  const requests = getWithdrawRequests();
+  requests.unshift({
+    id: 'WR' + Date.now() + Math.floor(Math.random()*1000),
+    username: currentUser,
+    amount: amt,
+    withdrawNumber: withdrawNumber,
+    status: 'pending',
+    requestedAt: new Date().toISOString(),
+  });
+  saveWithdrawRequests(requests);
+
+  document.getElementById('withdrawNumber').value = '';
+  note.textContent = 'Request submitted — waiting for admin approval';
+  note.style.color = '#F5A623';
+  renderMyWithdrawRequests();
+  flashGlow(btn, true);
+};
+document.querySelectorAll('[data-wd]').forEach(b=>{
+  b.onclick = ()=>{ document.getElementById('withdrawInput').value = b.dataset.wd; };
+});
+
+function renderMyWithdrawRequests(){
+  const el = document.getElementById('myWithdrawRequestsList');
+  if(!el) return;
+  const mine = getWithdrawRequests().filter(r => r.username === currentUser);
+  const countEl = document.getElementById('myWithdrawRequestCount');
+  if(countEl) countEl.textContent = mine.length;
+  if(mine.length === 0){ el.innerHTML = '<div class="empty-note">No requests yet</div>'; return; }
+  el.innerHTML = mine.map(r=>{
+    const statusLabel = r.status === 'pending' ? '⏳ Pending'
+      : r.status === 'rejected' ? '❌ Rejected — refunded to Wallet'
+      : '✔️ Approved';
+    const statusColor = r.status === 'pending' ? 'var(--amber)'
+      : r.status === 'rejected' ? 'var(--down)'
+      : 'var(--up)';
+    return `
+      <div class="history-row">
+        <div>
+          <div>${fmt(r.amount)}</div>
+          <div class="meta">${r.withdrawNumber ? r.withdrawNumber+' · ' : ''}${new Date(r.requestedAt).toLocaleString()}</div>
+        </div>
+        <div style="color:${statusColor};font-size:11px;text-align:right;">${statusLabel}</div>
+      </div>`;
   }).join('');
-  listEl.innerHTML = (pendingHtml + resolvedHtml) || '<div class="empty-note">No pending requests</div>';
-  listEl.querySelectorAll('[data-approve-wd]').forEach(btn=>{
-    btn.onclick = async ()=>{
-      await fetch('/api/admin/approve-withdraw', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({password: adminPassword, id: btn.dataset.approveWd})});
-      renderAdminWithdrawRequests();
-    };
-  });
-  listEl.querySelectorAll('[data-reject-wd]').forEach(btn=>{
-    btn.onclick = async ()=>{
-      await fetch('/api/admin/reject-withdraw', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({password: adminPassword, id: btn.dataset.rejectWd})});
-      renderAdminWithdrawRequests();
-    };
-  });
 }
 
-async function renderAdminMessages(){
+function renderMyMessages(){
+  const el = document.getElementById('myMessagesList');
+  if(!el) return;
+  const mine = getAdminMessages().filter(m => m.username === currentUser)
+    .sort((a,b)=> new Date(a.sentAt) - new Date(b.sentAt));
+  if(mine.length === 0){ el.innerHTML = '<div class="empty-note">No messages yet — say hello!</div>'; return; }
+  let html = '';
+  mine.forEach(m=>{
+    html += `
+      <div class="chat-bubble-row mine">
+        <div class="chat-bubble mine">
+          ${m.message}
+          <div class="chat-meta">${new Date(m.sentAt).toLocaleTimeString()}</div>
+        </div>
+      </div>`;
+    if(m.reply){
+      html += `
+        <div class="chat-bubble-row theirs">
+          <div class="chat-bubble theirs">
+            <span class="chat-label">Admin</span>${m.reply}
+            <div class="chat-meta">${new Date(m.repliedAt).toLocaleTimeString()}</div>
+          </div>
+        </div>`;
+    }
+  });
+  el.innerHTML = html;
+  el.scrollTop = el.scrollHeight;
+}
+
+function renderAdminMessages(){
   const listEl = document.getElementById('adminMessagesList');
   const countEl = document.getElementById('adminMessageCount');
-  if(!listEl || !adminPassword) return;
-  const res = await fetch('/api/admin/messages?password=' + encodeURIComponent(adminPassword));
-  if(!res.ok) return;
-  const data = await res.json();
-  countEl.textContent = data.messages.length;
-  listEl.innerHTML = data.messages.length===0 ? '<div class="empty-note">No messages yet</div>' : data.messages.map(m=>`
+  if(!listEl) return;
+  const messages = getAdminMessages();
+  countEl.textContent = messages.length;
+  if(messages.length === 0){ listEl.innerHTML = '<div class="empty-note">No messages yet</div>'; return; }
+  listEl.innerHTML = messages.map(m => `
     <div class="history-row" style="flex-direction:column;align-items:stretch;gap:8px;">
-      <div><div>${m.username}: ${m.message}</div><div class="meta">${new Date(m.sent_at).toLocaleString()}</div></div>
-      ${m.reply ? `<div style="color:var(--up);font-size:12px;padding-left:10px;border-left:2px solid var(--up);">Your reply: ${m.reply}</div>`
-        : `<div style="display:flex;gap:6px;"><div class="invest-box" style="flex:1;"><input type="text" data-reply-input="${m.id}" placeholder="Type a reply" style="padding:8px;font-size:13px;"></div>
-           <button class="verify-submit" style="width:auto;padding:8px 14px;margin:0;" data-reply-send="${m.id}">Send</button></div>`}
+      <div>
+        <div>${m.username}: ${m.message}</div>
+        <div class="meta">${new Date(m.sentAt).toLocaleString()}</div>
+      </div>
+      ${m.reply ? `
+        <div style="color:var(--up);font-size:12px;padding-left:10px;border-left:2px solid var(--up);">
+          Your reply: ${m.reply}
+        </div>
+      ` : `
+        <div style="display:flex;gap:6px;">
+          <div class="invest-box" style="flex:1;"><input type="text" data-reply-input="${m.id}" placeholder="Type a reply" style="padding:8px;font-size:13px;"></div>
+          <button class="verify-submit" style="width:auto;padding:8px 14px;margin:0;" data-reply-send="${m.id}">Send</button>
+        </div>
+      `}
     </div>`).join('');
+
   listEl.querySelectorAll('[data-reply-send]').forEach(btn=>{
-    btn.onclick = async ()=>{
+    btn.onclick = ()=>{
       const id = btn.dataset.replySend;
       const input = listEl.querySelector(`[data-reply-input="${id}"]`);
-      const reply = input.value.trim();
-      if(!reply) return;
-      await fetch('/api/admin/reply-message', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({password: adminPassword, id, reply})});
+      const replyText = input.value.trim();
+      if(!replyText) return;
+      const all = getAdminMessages();
+      const msg = all.find(m => m.id === id);
+      if(!msg) return;
+      msg.reply = replyText;
+      msg.repliedAt = new Date().toISOString();
+      saveAdminMessages(all);
       renderAdminMessages();
     };
   });
 }
+
+function renderAdminWithdrawRequests(){
+  const listEl = document.getElementById('adminWithdrawRequestsList');
+  const countEl = document.getElementById('adminWithdrawPendingCount');
+  if(!listEl) return;
+  const requests = getWithdrawRequests();
+  const pending = requests.filter(r => r.status === 'pending');
+  const resolved = requests.filter(r => r.status !== 'pending');
+  countEl.textContent = pending.length;
+
+  if(pending.length === 0 && resolved.length === 0){
+    listEl.innerHTML = '<div class="empty-note">No pending requests</div>';
+    return;
+  }
+
+  const pendingHtml = pending.map(r => `
+    <div class="history-row">
+      <div>
+        <div>${r.username} — ${fmt(r.amount)}</div>
+        <div class="meta">${r.withdrawNumber ? 'Number: '+r.withdrawNumber+' · ' : ''}${new Date(r.requestedAt).toLocaleString()}</div>
+      </div>
+      <div style="display:flex;gap:6px;flex-shrink:0;">
+        <button class="verify-submit" style="width:auto;padding:8px 14px;margin:0;" data-approve-wd-id="${r.id}">Approve</button>
+        <button class="verify-submit" style="width:auto;padding:8px 14px;margin:0;background:var(--down);" data-reject-wd-id="${r.id}">Reject</button>
+      </div>
+    </div>`).join('');
+
+  const resolvedHtml = resolved.map(r => {
+    const isRejected = r.status === 'rejected';
+    return `
+    <div class="history-row" style="${isRejected ? 'border-color:rgba(241,73,91,0.35);' : ''}">
+      <div>
+        <div style="color:${isRejected ? 'var(--down)' : 'var(--up)'};">${r.username} — ${fmt(r.amount)} · ${isRejected ? 'Rejected' : 'Approved'}</div>
+        <div class="meta" style="${isRejected ? 'color:var(--down);' : ''}">${new Date(r.resolvedAt || r.requestedAt).toLocaleString()}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  listEl.innerHTML = pendingHtml + resolvedHtml;
+
+  listEl.querySelectorAll('[data-approve-wd-id]').forEach(btn=>{
+    btn.onclick = ()=>{
+      const id = btn.dataset.approveWdId;
+      const all = getWithdrawRequests();
+      const req = all.find(r => r.id === id);
+      if(!req) return;
+      req.status = 'approved';
+      req.resolvedAt = new Date().toISOString();
+      saveWithdrawRequests(all);
+
+      // record it in the target user's own withdraw history
+      if(req.username === currentUser){
+        state.withdrawHistory.unshift({amount: req.amount, time:new Date().toLocaleTimeString()});
+        renderWithdrawHistoryList();
+        saveState();
+      } else {
+        const raw = loadRawUserState(req.username);
+        if(raw){
+          raw.withdrawHistory = raw.withdrawHistory || [];
+          raw.withdrawHistory.unshift({amount: req.amount, time:new Date().toLocaleTimeString()});
+          saveRawUserState(req.username, raw);
+        }
+      }
+      renderAdminWithdrawRequests();
+    };
+  });
+
+  listEl.querySelectorAll('[data-reject-wd-id]').forEach(btn=>{
+    btn.onclick = ()=>{
+      const id = btn.dataset.rejectWdId;
+      const all = getWithdrawRequests();
+      const req = all.find(r => r.id === id);
+      if(!req) return;
+      req.status = 'rejected';
+      req.resolvedAt = new Date().toISOString();
+      saveWithdrawRequests(all);
+
+      // refund the locked amount back to the requester's wallet
+      if(req.username === currentUser){
+        state.walletBalance += req.amount;
+        updateBalanceUI();
+        saveState();
+      } else {
+        const raw = loadRawUserState(req.username);
+        if(raw){
+          raw.walletBalance = (raw.walletBalance || 0) + req.amount;
+          saveRawUserState(req.username, raw);
+        }
+      }
+      renderAdminWithdrawRequests();
+    };
+  });
+}
+
 
 </script>
 </body>
