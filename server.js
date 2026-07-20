@@ -16,6 +16,13 @@ const fs = require('fs');
 
 const app = express();
 app.use(express.json());
+const cors = require('cors');
+app.use(cors({
+    origin: '*', 
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 const PORT = process.env.PORT || 3000;
