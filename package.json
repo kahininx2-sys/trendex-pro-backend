@@ -1,12 +1,13 @@
 {
-  "name": "tradeline-demo-backend",
+  "name": "tradeline-real-backend",
   "version": "1.0.0",
-  "description": "Demo trading simulator backend — virtual funds only, runs the candle engine 24/7 server-side.",
+  "description": "real trading simulator backend — virtual funds only, runs the candle engine 24/7 server-side.",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
-  "dependencies": {
-    "express": "^4.19.2"
+    "dependencies": {
+    "better-sqlite3": "^11.0.0",
+    "cors": "^2.8.5"
   }
-}
+
