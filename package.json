@@ -1,13 +1,13 @@
 {
   "name": "tradeline-real-backend",
   "version": "1.0.0",
-  "description": "real trading simulator backend — virtual funds only, runs the candle engine 24/7 server-side.",
+  "description": "real trading simulator backend",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
-    "dependencies": {
+  "dependencies": {
     "better-sqlite3": "^11.0.0",
     "cors": "^2.8.5"
   }
-
+}
