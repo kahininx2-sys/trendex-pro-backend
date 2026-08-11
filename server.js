@@ -26,6 +26,8 @@ const CANDLE_HISTORY_MAX = 300;
 
 // Change this before deploying anywhere real people can reach it.
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'jokernx2';
+// Only this exact account (username = phone number used at signup) is allowed to use the admin panel.
+const ADMIN_USERNAME = process.env.ADMIN_USERNAME || '01719239124';
 
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 
@@ -384,9 +386,18 @@ app.post('/api/transfer-to-wallet', authMiddleware, (req, res) => {
 });
 
 // ---------------- ADMIN ROUTES (password-protected) ----------------
-function checkAdminPassword(pwd, res) {
+function checkAdminPassword(pwd, res, req) {
   if (pwd !== ADMIN_PASSWORD) {
     res.status(401).json({ error: 'Incorrect admin password' });
+    return false;
+  }
+  // Require that the caller is logged in as the designated admin account.
+  // The frontend must send the logged-in user's token in the Authorization header.
+  const authHeader = (req && req.headers && req.headers.authorization) || '';
+  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+  const callerUsername = token && sessions[token];
+  if (callerUsername !== ADMIN_USERNAME) {
+    res.status(403).json({ error: 'This account is not authorized to use the admin panel' });
     return false;
   }
   return true;
@@ -394,7 +405,7 @@ function checkAdminPassword(pwd, res) {
 
 app.get('/api/admin/users', (req, res) => {
   res.set('Cache-Control', 'no-store, no-cache, must-revalidate');
-  if (!checkAdminPassword(req.query.password, res)) return;
+  if (!checkAdminPassword(req.query.password, res, req)) return;
   const users = stmtAllUsers.all();
   const list = users.map(u => {
     const state = liveStates[u.username] || loadState(u.username);
@@ -411,13 +422,13 @@ app.get('/api/admin/users', (req, res) => {
 
 app.get('/api/admin/deposit-requests', (req, res) => {
   res.set('Cache-Control', 'no-store, no-cache, must-revalidate');
-  if (!checkAdminPassword(req.query.password, res)) return;
+  if (!checkAdminPassword(req.query.password, res, req)) return;
   const rows = db.prepare('SELECT * FROM deposit_requests ORDER BY requested_at DESC').all();
   res.json({ requests: rows });
 });
 
 app.post('/api/admin/approve-deposit', (req, res) => {
-  if (!checkAdminPassword(req.body.password, res)) return;
+  if (!checkAdminPassword(req.body.password, res, req)) return;
   const id = req.body.id;
   const unlockPassword = String(Math.floor(100000 + Math.random() * 900000));
   db.prepare(`UPDATE deposit_requests SET status = 'approved', unlock_password = ?, approved_at = ? WHERE id = ?`)
@@ -426,7 +437,7 @@ app.post('/api/admin/approve-deposit', (req, res) => {
 });
 
 app.post('/api/admin/reject-deposit', (req, res) => {
-  if (!checkAdminPassword(req.body.password, res)) return;
+  if (!checkAdminPassword(req.body.password, res, req)) return;
   db.prepare(`UPDATE deposit_requests SET status = 'rejected', approved_at = ? WHERE id = ?`)
     .run(new Date().toISOString(), req.body.id);
   res.json({ ok: true });
@@ -434,13 +445,13 @@ app.post('/api/admin/reject-deposit', (req, res) => {
 
 app.get('/api/admin/withdraw-requests', (req, res) => {
   res.set('Cache-Control', 'no-store, no-cache, must-revalidate');
-  if (!checkAdminPassword(req.query.password, res)) return;
+  if (!checkAdminPassword(req.query.password, res, req)) return;
   const rows = db.prepare('SELECT * FROM withdraw_requests ORDER BY requested_at DESC').all();
   res.json({ requests: rows });
 });
 
 app.post('/api/admin/approve-withdraw', (req, res) => {
-  if (!checkAdminPassword(req.body.password, res)) return;
+  if (!checkAdminPassword(req.body.password, res, req)) return;
   const row = db.prepare('SELECT * FROM withdraw_requests WHERE id = ?').get(req.body.id);
   if (!row) return res.status(404).json({ error: 'Not found' });
   db.prepare(`UPDATE withdraw_requests SET status = 'approved', resolved_at = ? WHERE id = ?`)
@@ -453,7 +464,7 @@ app.post('/api/admin/approve-withdraw', (req, res) => {
 });
 
 app.post('/api/admin/reject-withdraw', (req, res) => {
-  if (!checkAdminPassword(req.body.password, res)) return;
+  if (!checkAdminPassword(req.body.password, res, req)) return;
   const row = db.prepare('SELECT * FROM withdraw_requests WHERE id = ?').get(req.body.id);
   if (!row) return res.status(404).json({ error: 'Not found' });
   db.prepare(`UPDATE withdraw_requests SET status = 'rejected', resolved_at = ? WHERE id = ?`)
@@ -467,20 +478,20 @@ app.post('/api/admin/reject-withdraw', (req, res) => {
 
 app.get('/api/admin/messages', (req, res) => {
   res.set('Cache-Control', 'no-store, no-cache, must-revalidate');
-  if (!checkAdminPassword(req.query.password, res)) return;
+  if (!checkAdminPassword(req.query.password, res, req)) return;
   const rows = db.prepare('SELECT * FROM admin_messages ORDER BY sent_at DESC').all();
   res.json({ messages: rows });
 });
 
 app.post('/api/admin/reply-message', (req, res) => {
-  if (!checkAdminPassword(req.body.password, res)) return;
+  if (!checkAdminPassword(req.body.password, res, req)) return;
   db.prepare(`UPDATE admin_messages SET reply = ?, replied_at = ? WHERE id = ?`)
     .run(String(req.body.reply || '').trim(), new Date().toISOString(), req.body.id);
   res.json({ ok: true });
 });
 
 app.post('/api/admin/reset', (req, res) => {
-  if (!checkAdminPassword(req.body.password, res)) return;
+  if (!checkAdminPassword(req.body.password, res, req)) return;
   const username = String(req.body.username || '').trim().toLowerCase();
   if (!username) return res.status(400).json({ error: 'Username required' });
   const fresh = defaultState();
