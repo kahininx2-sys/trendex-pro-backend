@@ -16,7 +16,13 @@ const fs = require('fs');
 
 const app = express();
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'), {
+  setHeaders: (res, filePath) => {
+    // Always fetch the freshest index.html/app.js so a redeploy shows up immediately,
+    // instead of a stale cached copy on the user's phone.
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+  }
+}));
 
 const PORT = process.env.PORT || 3000;
 const DATA_DIR = path.join(__dirname, 'data');
